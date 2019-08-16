@@ -8,7 +8,8 @@ import lombok.*;
 @Builder
 @ToString
 public class NatsConfigModel {
-    private String host = "127.0.0.1";
+    private String host = "localhost";
+    private String hostIp = "127.0.0.1";
     private String protocol="nats";
     private String port = "4222";
     private boolean useEpoll;
