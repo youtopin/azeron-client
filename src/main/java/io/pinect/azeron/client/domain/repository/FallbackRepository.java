@@ -1,6 +1,7 @@
 package io.pinect.azeron.client.domain.repository;
 
 import io.pinect.azeron.client.service.publisher.EventMessagePublisher;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,53 +44,16 @@ public interface FallbackRepository {
     /**
      * Fallback entity to persist and used when retrying to send message later
      */
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @Builder
+    @NoArgsConstructor
     class FallbackEntity {
         private String id;
         private String message;
         private String eventName;
         private EventMessagePublisher.PublishStrategy strategy;
-
-        public FallbackEntity() {
-        }
-
-        public FallbackEntity(String id, String message, String eventName, EventMessagePublisher.PublishStrategy publishStrategy) {
-            this.id = id;
-            this.message = message;
-            this.eventName = eventName;
-            this.strategy = publishStrategy;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public String getEventName() {
-            return eventName;
-        }
-
-        public void setEventName(String eventName) {
-            this.eventName = eventName;
-        }
-
-        public EventMessagePublisher.PublishStrategy getStrategy() {
-            return strategy;
-        }
-
-        public void setStrategy(EventMessagePublisher.PublishStrategy strategy) {
-            this.strategy = strategy;
-        }
 
         @Override
         public boolean equals(Object o) {

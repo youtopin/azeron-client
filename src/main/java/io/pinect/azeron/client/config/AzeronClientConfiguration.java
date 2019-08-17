@@ -1,15 +1,22 @@
 package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
+import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.domain.repository.MessageRepository;
 import io.pinect.azeron.client.domain.repository.NullMessageRepository;
 import io.pinect.azeron.client.service.NatsConfigProvider;
+import io.pinect.azeron.client.service.lock.ProcessingLock;
+import io.pinect.azeron.client.service.lock.SingleNodeProcessingLock;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.AlwaysRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
@@ -42,11 +49,36 @@ public class AzeronClientConfiguration {
         return threadPoolTaskExecutor;
     }
 
+    @Bean("eventPublishRetryTemplate")
+    @Scope("singleton")
+    public RetryTemplate eventPublishRetryTemplate(){
+        FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+        backOffPolicy.setBackOffPeriod(5000); // 5 seconds
+
+        RetryTemplate template = new RetryTemplate();
+        template.setRetryPolicy(new AlwaysRetryPolicy());
+        template.setBackOffPolicy(backOffPolicy);
+
+        return template;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ProcessingLock.class)
+    public ProcessingLock processingLock(){
+        return new SingleNodeProcessingLock();
+    }
+
     @Bean
     @ConditionalOnMissingBean(NatsConfigProvider.class)
     public NatsConfigProvider natsConfigProvider(){
         //todo
         return null;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(FallbackRepository.class)
+    public FallbackRepository fallbackRepository(){
+        return new FallbackRepository.VoidFallbackRepository();
     }
 
 }

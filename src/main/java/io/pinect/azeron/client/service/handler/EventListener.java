@@ -18,6 +18,7 @@ public interface EventListener<E> extends MessageHandler {
     default boolean useAzeron(){
         return true;
     }
+    void handle(String messageBody);
 
     interface AzeronErrorHandler {
         void onError(Exception e, @Nullable MessageDto messageDto);
