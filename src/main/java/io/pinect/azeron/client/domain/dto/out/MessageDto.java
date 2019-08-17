@@ -1,16 +1,14 @@
-package io.pinect.azeron.client.domain.dto;
+package io.pinect.azeron.client.domain.dto.out;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class MessageDto implements Serializable {
     private String messageId;

@@ -1,9 +1,6 @@
 package io.pinect.azeron.client.domain.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,6 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class MessageEntity implements Serializable {
     private String messageId;

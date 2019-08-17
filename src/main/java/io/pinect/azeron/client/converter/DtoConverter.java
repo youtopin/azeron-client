@@ -1,6 +1,6 @@
 package io.pinect.azeron.client.converter;
 
-import io.pinect.azeron.client.domain.dto.MessageDto;
+import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.entity.MessageEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

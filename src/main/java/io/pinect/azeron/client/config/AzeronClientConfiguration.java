@@ -3,6 +3,7 @@ package io.pinect.azeron.client.config;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.MessageRepository;
 import io.pinect.azeron.client.domain.repository.NullMessageRepository;
+import io.pinect.azeron.client.service.NatsConfigProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,6 +40,13 @@ public class AzeronClientConfiguration {
         threadPoolTaskExecutor.setBeanName("seenExecutor");
         threadPoolTaskExecutor.setAwaitTerminationSeconds(10);
         return threadPoolTaskExecutor;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(NatsConfigProvider.class)
+    public NatsConfigProvider natsConfigProvider(){
+        //todo
+        return null;
     }
 
 }

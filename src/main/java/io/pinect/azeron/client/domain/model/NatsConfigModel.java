@@ -6,6 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @Builder
+@AllArgsConstructor
 @ToString
 public class NatsConfigModel {
     private String host = "localhost";

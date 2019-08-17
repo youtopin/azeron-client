@@ -36,7 +36,7 @@ public class MessageProcessorStage implements Stage<MessageEntity, AzeronHandler
             azeronMessageProcessor.process(value);
             processed = true;
         }catch (Exception e){
-            azeronErrorHandler.onError(e);
+            azeronErrorHandler.onError(e, null);
         }
 
         if(handlerPolicy.equals(HandlerPolicy.PROC))
