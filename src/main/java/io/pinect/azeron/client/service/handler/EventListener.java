@@ -16,7 +16,7 @@ public interface EventListener<E> extends MessageHandler {
     String eventName();
     ClientConfig clientConfig();
     default boolean useAzeron(){
-        return true;
+        return policy().equals(HandlerPolicy.ASYNC_SEEN) || policy().equals(HandlerPolicy.FULL);
     }
     void handle(String messageBody);
 

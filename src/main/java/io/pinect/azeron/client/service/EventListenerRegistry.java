@@ -88,7 +88,7 @@ public class EventListenerRegistry {
     }
 
     private void subscribe(EventListener eventListener) throws JsonProcessingException {
-        if(eventListener.clientConfig().isPersist() || eventListener.useAzeron())
+        if(eventListener.useAzeron())
             subscribeWithAzeron(eventListener);
         else
             subscribeToNats(eventListener);

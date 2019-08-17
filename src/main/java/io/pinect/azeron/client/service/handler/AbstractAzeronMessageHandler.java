@@ -58,7 +58,7 @@ public abstract class AbstractAzeronMessageHandler<E> implements EventListener<E
     private Pipeline<MessageEntity, AzeronHandlerPiplineResult> getPipeline(HandlerPolicy policy, AzeronMessageProcessor azeronMessageProcessor, AzeronErrorHandler azeronErrorHandler, Class eClass, ProcessErrorStrategy processErrorStrategy){
         Pipeline<MessageEntity, AzeronHandlerPiplineResult> pipeline = new Pipeline<>();
         pipeline.addStage(new MessageAddStage(policy, messageRepository));
-        pipeline.addStage(new SeenStage(policy, messageRepository, seenPublisher, seenExecutor));
+        pipeline.addStage(new SeenStage(policy, messageRepository, azeronErrorHandler, seenPublisher, seenExecutor));
         pipeline.addStage(new MessageProcessorStage(processingLock, azeronMessageProcessor, azeronErrorHandler, messageRepository, processErrorStrategy, policy, objectMapper, eClass));
         return pipeline;
     }

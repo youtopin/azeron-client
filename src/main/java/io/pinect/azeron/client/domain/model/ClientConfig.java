@@ -16,7 +16,6 @@ import java.util.Objects;
 public class ClientConfig {
     private int version;
     private String serviceName;
-    private boolean persist;
     private boolean useQueueGroup;
 
     @Override
