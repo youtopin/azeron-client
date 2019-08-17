@@ -42,26 +42,27 @@ public class MessageProcessorStage implements Stage<MessageEntity, AzeronHandler
             if(lock.tryLock()){
                 azeronMessageProcessor.process(value);
                 processed = true;
-            }else {
+            } else {
                 return true;
             }
         }catch (Exception e){
             azeronErrorHandler.onError(e, null);
         }
 
-
-        if(!processed && processErrorStrategy.equals(ProcessErrorStrategy.CONTINUE)) {
-            messageRepository.processed(messageEntity);
+        try {
+            if(handlerPolicy.equals(HandlerPolicy.PROC))
+                return true;
+            if(!processed && processErrorStrategy.equals(ProcessErrorStrategy.CONTINUE)) {
+                messageRepository.processed(messageEntity);
+            }
+            else if(processed) {
+                messageRepository.processed(messageEntity);
+            }
+        }finally {
+            lock.unlock();
+            processingLock.removeLock(messageEntity.getMessageId());
         }
-        else if(processed) {
-            messageRepository.processed(messageEntity);
-        }
 
-        lock.unlock();
-        processingLock.removeLock(messageEntity.getMessageId());
-
-        if(handlerPolicy.equals(HandlerPolicy.PROC))
-            return true;
         return true;
     }
 }
