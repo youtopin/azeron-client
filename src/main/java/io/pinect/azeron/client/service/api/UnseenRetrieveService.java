@@ -1,6 +1,7 @@
-package io.pinect.azeron.client.service;
+package io.pinect.azeron.client.service.api;
 
 import io.pinect.azeron.client.domain.dto.in.UnseenResponseDto;
+import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.handler.EventListener;
 import io.pinect.azeron.client.service.publisher.AzeronUnSeenQueryPublisher;
 import lombok.extern.log4j.Log4j2;

@@ -2,7 +2,7 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
-import io.pinect.azeron.client.service.NatsConfigProvider;
+import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.stateListener.NatsConnectionStateListener;
 import nats.client.Nats;
 import nats.client.NatsConnector;

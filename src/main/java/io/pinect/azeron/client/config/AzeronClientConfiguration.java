@@ -4,9 +4,13 @@ import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.domain.repository.MessageRepository;
 import io.pinect.azeron.client.domain.repository.NullMessageRepository;
-import io.pinect.azeron.client.service.NatsConfigProvider;
+import io.pinect.azeron.client.service.AzeronNatsConfigChoserService;
+import io.pinect.azeron.client.service.NatsConfigChoserService;
+import io.pinect.azeron.client.service.api.HostBasedNatsConfigProvider;
+import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.lock.ProcessingLock;
 import io.pinect.azeron.client.service.lock.SingleNodeProcessingLock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,6 +22,7 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,6 +32,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 @ComponentScan("io.pinect.azeron.client")
 @EnableConfigurationProperties({AzeronClientProperties.class})
 public class AzeronClientConfiguration {
+    private final AzeronClientProperties azeronClientProperties;
+
+    @Autowired
+    public AzeronClientConfiguration(AzeronClientProperties azeronClientProperties) {
+        this.azeronClientProperties = azeronClientProperties;
+    }
+
 
     @Bean
     @ConditionalOnMissingBean(MessageRepository.class)
@@ -69,10 +81,15 @@ public class AzeronClientConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(NatsConfigChoserService.class)
+    public NatsConfigChoserService natsConfigChoserService(){
+        return new AzeronNatsConfigChoserService();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(NatsConfigProvider.class)
     public NatsConfigProvider natsConfigProvider(){
-        //todo
-        return null;
+        return new HostBasedNatsConfigProvider(new RestTemplate(), azeronClientProperties, natsConfigChoserService());
     }
 
     @Bean
