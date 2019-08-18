@@ -3,6 +3,7 @@ package io.pinect.azeron.client.config;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import io.pinect.azeron.client.service.api.Pinger;
+import io.pinect.azeron.client.service.api.UnseenRetrieveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
@@ -18,14 +19,17 @@ import java.util.concurrent.TimeUnit;
 public class ApplicationStartupListener implements ApplicationListener<ApplicationReadyEvent> {
     private final AzeronClientProperties azeronClientProperties;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
+    private final UnseenRetrieveService unseenRetrieveService;
     private final TaskScheduler azeronTaskScheduler;
-    private ScheduledFuture<?> schedule;
+    private ScheduledFuture<?> pingSchedule;
+    private ScheduledFuture<?> unseenSchedule;
     private final Pinger pinger;
 
     @Autowired
-    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, AzeronServerStatusTracker azeronServerStatusTracker, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveService unseenRetrieveService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
+        this.unseenRetrieveService = unseenRetrieveService;
         this.azeronTaskScheduler = azeronTaskScheduler;
         this.pinger = pinger;
     }
@@ -33,12 +37,13 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         startPingTaskSchedule();
+        startUnseenRetrieveSchedule();
     }
 
     private void startPingTaskSchedule(){
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getPingIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getPingIntervalSeconds() * 1000);
-        this.schedule = azeronTaskScheduler.schedule(new Runnable() {
+        this.pingSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
                 AzeronServerStatusTracker.Status status = pinger.ping();
@@ -47,8 +52,20 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
         }, periodicTrigger);
     }
 
+    private void startUnseenRetrieveSchedule(){
+        PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnseenQueryIntervalSeconds(), TimeUnit.SECONDS);
+        periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds() * 1000);
+        this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
+            @Override
+            public void run() {
+                unseenRetrieveService.execute();
+            }
+        }, periodicTrigger);
+    }
+
     @PreDestroy
     public void destroy(){
-        schedule.cancel(true);
+        pingSchedule.cancel(true);
+        unseenSchedule.cancel(true);
     }
 }

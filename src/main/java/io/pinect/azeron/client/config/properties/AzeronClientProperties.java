@@ -10,5 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AzeronClientProperties {
     private boolean unSubscribeWhenShuttingDown = false;
     private String azeronServerHost = "localhost";
-    private int pingIntervalSeconds=10;
+    private int pingIntervalSeconds = 10;
+    private int unseenQueryIntervalSeconds = 10;
 }
