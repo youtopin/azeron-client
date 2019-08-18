@@ -34,6 +34,8 @@ public class UnseenRetrieveService {
                     EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
                     eventListener.handle(messageDto.getObject().toString());
                 });
+            }else{
+                log.warn("UnSeen retrieve service execution is called in short period. Previous call is not finished yet and is holding the lock.");
             }
         } catch (Exception e) {
             log.error(e);

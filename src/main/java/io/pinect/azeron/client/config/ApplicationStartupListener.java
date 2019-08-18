@@ -4,6 +4,7 @@ import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.api.UnseenRetrieveService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
@@ -16,6 +17,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Log4j2
 public class ApplicationStartupListener implements ApplicationListener<ApplicationReadyEvent> {
     private final AzeronClientProperties azeronClientProperties;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
@@ -41,6 +43,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     }
 
     private void startPingTaskSchedule(){
+        log.trace("Starting ping task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getPingIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getPingIntervalSeconds() * 1000);
         this.pingSchedule = azeronTaskScheduler.schedule(new Runnable() {
@@ -53,6 +56,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     }
 
     private void startUnseenRetrieveSchedule(){
+        log.trace("Starting unseen retrieve task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnseenQueryIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds() * 1000);
         this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
