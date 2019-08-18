@@ -6,10 +6,13 @@ import io.pinect.azeron.client.domain.repository.MessageRepository;
 import io.pinect.azeron.client.domain.repository.NullMessageRepository;
 import io.pinect.azeron.client.service.AzeronNatsConfigChoserService;
 import io.pinect.azeron.client.service.NatsConfigChoserService;
+import io.pinect.azeron.client.service.api.HostBasedAzeronInstancePinger;
 import io.pinect.azeron.client.service.api.HostBasedNatsConfigProvider;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
+import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.lock.ProcessingLock;
 import io.pinect.azeron.client.service.lock.SingleNodeProcessingLock;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,7 +24,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.Executor;
@@ -31,6 +37,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAutoConfiguration
 @ComponentScan("io.pinect.azeron.client")
 @EnableConfigurationProperties({AzeronClientProperties.class})
+@Log4j2
 public class AzeronClientConfiguration {
     private final AzeronClientProperties azeronClientProperties;
 
@@ -93,9 +100,34 @@ public class AzeronClientConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(Pinger.class)
+    public Pinger pinger(){
+        return new HostBasedAzeronInstancePinger(azeronClientProperties);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(FallbackRepository.class)
     public FallbackRepository fallbackRepository(){
         return new FallbackRepository.VoidFallbackRepository();
+    }
+
+    @Bean("azeronTaskScheduler")
+    public TaskScheduler azeronTaskScheduler() {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(20);
+        threadPoolTaskScheduler.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        threadPoolTaskScheduler.setRemoveOnCancelPolicy(false);
+        threadPoolTaskScheduler.setErrorHandler(new ErrorHandler() {
+            @Override
+            public void handleError(Throwable throwable) {
+                log.error("Error in azeronTaskScheduler", throwable);
+            }
+        });
+        threadPoolTaskScheduler.setThreadGroupName("azeron_server");
+        threadPoolTaskScheduler.setThreadPriority(Thread.MAX_PRIORITY);
+        threadPoolTaskScheduler.setBeanName("azeronTaskScheduler");
+        threadPoolTaskScheduler.initialize();
+        return threadPoolTaskScheduler;
     }
 
 }
