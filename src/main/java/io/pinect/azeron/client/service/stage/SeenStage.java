@@ -27,6 +27,9 @@ public class SeenStage implements Stage<MessageEntity, AzeronHandlerPiplineResul
 
     @Override
     public synchronized boolean process(MessageEntity messageEntity, AzeronHandlerPiplineResult o) {
+        if(messageEntity.isSeen())
+            return true;
+
         if(handlerPolicy.equals(HandlerPolicy.PROC) || handlerPolicy.equals(HandlerPolicy.LOSABLE))
             return true;
 

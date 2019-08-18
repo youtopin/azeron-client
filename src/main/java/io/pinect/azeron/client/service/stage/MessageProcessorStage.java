@@ -35,6 +35,9 @@ public class MessageProcessorStage implements Stage<MessageEntity, AzeronHandler
 
     @Override
     public boolean process(MessageEntity messageEntity, AzeronHandlerPiplineResult o) {
+        if(messageEntity.isProcessed())
+            return true;
+
         boolean processed = false;
         Lock lock = processingLock.getLock(messageEntity.getMessageId());
         try{
