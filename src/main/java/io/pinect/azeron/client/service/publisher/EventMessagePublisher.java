@@ -40,8 +40,11 @@ public class EventMessagePublisher {
         this.serviceName = serviceName;
     }
 
+    public void sendMessage(String eventName, String message, PublishStrategy publishStrategy) throws Exception {
+        sendMessage(eventName, message, publishStrategy, null);
+    }
 
-    public void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
+    void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
         switch (publishStrategy){
             case BLOCKED:
                 sendMessageBlocked(eventName, message, messageHandler);
