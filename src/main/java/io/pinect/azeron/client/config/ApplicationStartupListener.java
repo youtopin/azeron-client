@@ -2,6 +2,7 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
+import io.pinect.azeron.client.service.ProcessReCheckService;
 import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.api.UnseenRetrieveService;
 import lombok.extern.log4j.Log4j2;
@@ -22,16 +23,18 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private final AzeronClientProperties azeronClientProperties;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
     private final UnseenRetrieveService unseenRetrieveService;
+    private final ProcessReCheckService processReCheckService;
     private final TaskScheduler azeronTaskScheduler;
     private ScheduledFuture<?> pingSchedule;
     private ScheduledFuture<?> unseenSchedule;
     private final Pinger pinger;
 
     @Autowired
-    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveService unseenRetrieveService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveService unseenRetrieveService, ProcessReCheckService processReCheckService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.unseenRetrieveService = unseenRetrieveService;
+        this.processReCheckService = processReCheckService;
         this.azeronTaskScheduler = azeronTaskScheduler;
         this.pinger = pinger;
     }
@@ -51,6 +54,18 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
             public void run() {
                 AzeronServerStatusTracker.Status status = pinger.ping();
                 azeronServerStatusTracker.setStatus(status);
+            }
+        }, periodicTrigger);
+    }
+
+    private void startUnProcessedCheckTask(){
+        log.trace("Starting un processed task schedule");
+        PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnProcessedRecheckIntervalSeconds(), TimeUnit.SECONDS);
+        periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds() * 1000);
+        this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
+            @Override
+            public void run() {
+                processReCheckService.execute();
             }
         }, periodicTrigger);
     }

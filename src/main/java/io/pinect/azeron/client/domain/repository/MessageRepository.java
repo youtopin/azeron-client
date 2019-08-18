@@ -4,16 +4,17 @@ import io.pinect.azeron.client.domain.entity.MessageEntity;
 
 import java.util.List;
 
-public interface MessageRepository {
-    void save(MessageEntity messageEntity);
+public interface MessageRepository<E extends MessageEntity> {
+    E save(E messageEntity);
     boolean exists(String messageId);
-    MessageEntity seen(MessageEntity messageEntity);
-    MessageEntity processed(MessageEntity messageEntity);
+    MessageEntity seen(E messageEntity);
+    MessageEntity processed(E messageEntity);
     void delete(MessageEntity messageEntity);
     List<String> getUnseenMessageIds(long offset, int limit);
-    List<MessageEntity> getUnseenMessages(long offset, int limit);
+    List<E> getUnseenMessages(long offset, int limit);
     List<String> getUnProcessedMessageIds(long offset, int limit);
-    List<MessageEntity> getUnProcessedMessages(long offset, int limit);
-    MessageEntity findById(String id);
-    MessageEntity findByIdIn(List<String> ids);
+    List<E> getUnProcessedMessages(long offset, int limit);
+    int countUnProcessed();
+    E findById(String id);
+    List<E> findByIdIn(List<String> ids);
 }

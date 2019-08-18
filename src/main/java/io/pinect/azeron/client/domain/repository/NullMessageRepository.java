@@ -6,14 +6,14 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 
 @Log4j2
-public class NullMessageRepository implements MessageRepository {
+public class NullMessageRepository implements MessageRepository<MessageEntity> {
     public NullMessageRepository() {
         log.warn("Constructed `NullMessageRepository` as a MessageRepository. This might be used as default repository bean. Are you sure?");
     }
 
     @Override
-    public void save(MessageEntity messageEntity) {
-
+    public MessageEntity save(MessageEntity messageEntity) {
+        return null;
     }
 
     @Override
@@ -57,12 +57,17 @@ public class NullMessageRepository implements MessageRepository {
     }
 
     @Override
+    public int countUnProcessed() {
+        return 0;
+    }
+
+    @Override
     public MessageEntity findById(String id) {
         return null;
     }
 
     @Override
-    public MessageEntity findByIdIn(List<String> ids) {
+    public List<MessageEntity> findByIdIn(List<String> ids) {
         return null;
     }
 }

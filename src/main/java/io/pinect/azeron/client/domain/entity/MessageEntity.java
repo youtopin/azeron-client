@@ -16,6 +16,6 @@ public class MessageEntity implements Serializable {
     private Date date;
     private String channelName;
     private String serviceName;
-    private boolean isSeen;
-    private boolean isProcessed;
+    private boolean seen;
+    private boolean processed;
 }
