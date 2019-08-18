@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "azeron.server")
+@ConfigurationProperties(prefix = "azeron.client")
 @Getter
 @Setter
 public class AzeronClientProperties {
