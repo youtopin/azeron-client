@@ -25,7 +25,7 @@ public class AzeronSeenPublisher extends EventMessagePublisher implements SeenPu
     private final String serviceName;
 
     @Autowired
-    public AzeronSeenPublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${application.name}") String serviceName) {
+    public AzeronSeenPublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName) {
         super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName);
         this.serviceName = serviceName;
     }

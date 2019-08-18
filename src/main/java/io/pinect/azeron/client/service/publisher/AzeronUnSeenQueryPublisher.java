@@ -22,7 +22,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
     private final String serviceName;
 
     @Autowired
-    public AzeronUnSeenQueryPublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${application.name}") String serviceName) {
+    public AzeronUnSeenQueryPublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName) {
         super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName);
         this.serviceName = serviceName;
     }
