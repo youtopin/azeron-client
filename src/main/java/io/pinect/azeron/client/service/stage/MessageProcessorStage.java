@@ -1,7 +1,6 @@
 package io.pinect.azeron.client.service.stage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.model.AzeronHandlerPiplineResult;
 import io.pinect.azeron.client.service.handler.AbstractAzeronMessageHandler;

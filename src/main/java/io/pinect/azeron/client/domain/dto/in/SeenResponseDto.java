@@ -1,7 +1,6 @@
 package io.pinect.azeron.client.domain.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
