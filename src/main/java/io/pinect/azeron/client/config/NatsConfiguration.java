@@ -1,5 +1,7 @@
 package io.pinect.azeron.client.config;
 
+import io.netty.channel.kqueue.KQueueEventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
@@ -15,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -43,6 +46,8 @@ public class NatsConfiguration {
         natsConnector.automaticReconnect(true);
         natsConnector.idleTimeout(natsConfig.getIdleTimeOut());
         natsConnector.pedantic(natsConfig.isPedanic());
+        natsConnector.eventLoopGroup(new NioEventLoopGroup());
+        natsConnector.calllbackExecutor(new ScheduledThreadPoolExecutor(20));
         natsConnector.reconnectWaitTime(5 , TimeUnit.SECONDS);
         Nats nats = natsConnector.connect();
         return new AtomicNatsHolder(nats);

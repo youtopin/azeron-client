@@ -8,6 +8,7 @@ import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.exception.PublishException;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import nats.client.MessageHandler;
 import nats.client.Nats;
 import org.springframework.lang.Nullable;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
+@Log4j2
 public class EventMessagePublisher {
     private final AtomicReference<Nats> natsAtomicReference;
     private final ObjectMapper objectMapper;
@@ -86,10 +88,14 @@ public class EventMessagePublisher {
         String json = getJson(messageDto);
         Nats nats = natsAtomicReference.get();
         if(nats.isConnected()) {
-            if(messageHandler == null)
+            if(messageHandler == null){
+                log.trace("Publishing to " + eventName);
                 nats.publish(eventName, json);
-            else
+
+            } else {
+                log.trace("Sending request message to "+ eventName);
                 nats.request(eventName, json, 20, TimeUnit.SECONDS, messageHandler);
+            }
             return;
         }
 

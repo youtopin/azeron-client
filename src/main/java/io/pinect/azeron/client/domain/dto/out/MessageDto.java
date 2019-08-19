@@ -11,6 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageDto implements Serializable {
     private String messageId;
