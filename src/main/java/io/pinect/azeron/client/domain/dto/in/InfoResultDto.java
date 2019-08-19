@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
 import io.pinect.azeron.client.domain.model.NatsConfigModelContainedEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +14,7 @@ import java.util.Objects;
 @Setter
 @Builder
 @AllArgsConstructor
+@ToString
 public class InfoResultDto extends BasicAzeronReponseDto {
     private List<InfoResult> results;
 
@@ -28,6 +26,8 @@ public class InfoResultDto extends BasicAzeronReponseDto {
     @Getter
     @Setter
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class InfoResult implements NatsConfigModelContainedEntity {
         private String serverUUID;
         private NatsConfigModel nats;

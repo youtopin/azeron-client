@@ -2,16 +2,14 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
-import io.pinect.azeron.client.domain.repository.MessageRepository;
-import io.pinect.azeron.client.domain.repository.NullMessageRepository;
 import io.pinect.azeron.client.service.AzeronNatsConfigChoserService;
 import io.pinect.azeron.client.service.NatsConfigChoserService;
 import io.pinect.azeron.client.service.api.HostBasedAzeronInstancePinger;
 import io.pinect.azeron.client.service.api.HostBasedNatsConfigProvider;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.api.Pinger;
-import io.pinect.azeron.client.service.lock.ProcessingLock;
-import io.pinect.azeron.client.service.lock.SingleNodeProcessingLock;
+import io.pinect.azeron.client.service.lock.HandlingLock;
+import io.pinect.azeron.client.service.lock.SingleNodeHandlingLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -45,14 +43,7 @@ public class AzeronClientConfiguration {
     public AzeronClientConfiguration(AzeronClientProperties azeronClientProperties) {
         this.azeronClientProperties = azeronClientProperties;
     }
-
-
-    @Bean
-    @ConditionalOnMissingBean(MessageRepository.class)
-    public MessageRepository messageRepository(){
-        return new NullMessageRepository();
-    }
-
+    
     @Bean("seenExecutor")
     public Executor seenExecutor(){
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
@@ -82,9 +73,9 @@ public class AzeronClientConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(ProcessingLock.class)
-    public ProcessingLock processingLock(){
-        return new SingleNodeProcessingLock();
+    @ConditionalOnMissingBean(HandlingLock.class)
+    public HandlingLock processingLock(){
+        return new SingleNodeHandlingLock();
     }
 
     @Bean

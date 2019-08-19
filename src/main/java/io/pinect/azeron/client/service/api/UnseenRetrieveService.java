@@ -26,6 +26,7 @@ public class UnseenRetrieveService {
     }
 
     public synchronized void execute(){
+        log.trace("Executing unseen query");
         boolean locked = lock.tryLock();
         try {
             if (locked) {

@@ -24,6 +24,7 @@ public class AzeronNatsConfigChoserService implements NatsConfigChoserService{
                     atomicReference.set(o.getNats());
             });
         } catch (UnknownHostException e) {
+            System.out.println("Fuck this shit");
             log.error(e);
         }
 

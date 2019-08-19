@@ -7,4 +7,5 @@ import lombok.Data;
 @Builder
 public class UnseenQueryDto {
     private String serviceName;
+    private long dateBefore;
 }

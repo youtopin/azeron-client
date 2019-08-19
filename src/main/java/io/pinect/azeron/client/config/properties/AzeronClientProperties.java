@@ -11,6 +11,6 @@ public class AzeronClientProperties {
     private boolean unSubscribeWhenShuttingDown = false;
     private String azeronServerHost = "localhost";
     private int pingIntervalSeconds = 10;
-    private int unseenQueryIntervalSeconds = 10;
+    private int unseenQueryIntervalSeconds = 20;
     private int unProcessedRecheckIntervalSeconds = 60;
 }

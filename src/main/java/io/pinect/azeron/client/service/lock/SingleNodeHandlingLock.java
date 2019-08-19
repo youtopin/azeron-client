@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SingleNodeProcessingLock implements ProcessingLock {
+public class SingleNodeHandlingLock implements HandlingLock {
     private final Map<String, Lock> lockMap = new HashMap<>();
 
     @Override

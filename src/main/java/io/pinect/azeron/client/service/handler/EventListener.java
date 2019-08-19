@@ -1,7 +1,6 @@
 package io.pinect.azeron.client.service.handler;
 
 import io.pinect.azeron.client.domain.HandlerPolicy;
-import io.pinect.azeron.client.domain.ProcessErrorStrategy;
 import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.model.ClientConfig;
 import nats.client.MessageHandler;
@@ -12,12 +11,13 @@ public interface EventListener<E> extends MessageHandler {
     Class<E> eClass();
     AzeronMessageProcessor<E> azeronMessageProcessor();
     AzeronErrorHandler azeronErrorHandler();
-    ProcessErrorStrategy processErrorStrategy();
     String eventName();
     ClientConfig clientConfig();
+
     default boolean useAzeron(){
-        return policy().equals(HandlerPolicy.ASYNC_SEEN) || policy().equals(HandlerPolicy.FULL);
+        return !policy().equals(HandlerPolicy.NO_AZERON);
     }
+
     void handle(String messageBody);
 
     interface AzeronErrorHandler {

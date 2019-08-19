@@ -1,5 +1,5 @@
 package io.pinect.azeron.client.domain;
 
 public enum HandlerPolicy {
-    FULL, PROC, ASYNC_SEEN, LOSABLE
+    FULL, LOSABLE, SEEN_ASYNC, NO_AZERON
 }
