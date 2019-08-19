@@ -72,31 +72,29 @@ public class EventMessagePublisher {
     }
 
     private void sendAzeronMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
-        if(azeronServerStatusTracker.isUp()){
-            publish(eventName, message, fallback, PublishStrategy.AZERON, messageHandler);
-        }else {
-            throw new PublishException(serviceName, message);
-        }
+        publish(eventName, message, true, fallback, PublishStrategy.AZERON, messageHandler);
     }
 
     private void sendNatsMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
-        publish(eventName, message, fallback, PublishStrategy.NATS, messageHandler);
+        publish(eventName, message, false, fallback, PublishStrategy.NATS, messageHandler);
     }
 
-    private void publish(String eventName, String message, boolean fallback, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
+    private void publish(String eventName, String message, boolean azeron, boolean fallback, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
         MessageDto messageDto = getMessageDto(serviceName, eventName, message);
         String json = getJson(messageDto);
         Nats nats = natsAtomicReference.get();
-        if(nats.isConnected()) {
-            if(messageHandler == null){
-                log.trace("Publishing to " + eventName);
-                nats.publish(eventName, json);
+        if(!azeron || azeronServerStatusTracker.isUp()){
+            if(nats.isConnected()) {
+                if(messageHandler == null){
+                    log.trace("Publishing to " + eventName);
+                    nats.publish(eventName, json);
 
-            } else {
-                log.trace("Sending request message to "+ eventName);
-                nats.request(eventName, json, 10, TimeUnit.SECONDS, messageHandler);
+                } else {
+                    log.trace("Sending request message to "+ eventName);
+                    nats.request(eventName, json, 10, TimeUnit.SECONDS, messageHandler);
+                }
+                return;
             }
-            return;
         }
 
         if(fallback)
