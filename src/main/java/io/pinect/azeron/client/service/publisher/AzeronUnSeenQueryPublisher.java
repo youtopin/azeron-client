@@ -15,7 +15,9 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -34,16 +36,28 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
     @Override
     public UnseenResponseDto publishQuery() throws Exception {
         UnseenQueryDto unseenQueryDto = UnseenQueryDto.builder().dateBefore(new Date().getTime() - ((azeronClientProperties.getUnseenQueryIntervalSeconds() + 1) * 1000)).serviceName(serviceName).build();
-        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(UnseenResponseDto.builder().count(0).hasMore(false).build());
-        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, getObjectMapper().writeValueAsString(unseenQueryDto), PublishStrategy.BLOCKED, message -> {
+        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(UnseenResponseDto.builder().messages(new ArrayList<>()).count(0).hasMore(false).build());
+
+        AtomicBoolean hasUpdated = new AtomicBoolean(false);
+
+        long l = new Date().getTime();
+
+        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, getObjectMapper().writeValueAsString(unseenQueryDto), PublishStrategy.AZERON, message -> {
             String messageBody = message.getBody();
+            System.out.println(messageBody);
             try {
                 unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));
             } catch (IOException e) {
                 log.error(e);
                 throw new RuntimeException(e);
             }
+            hasUpdated.set(true);
         });
+
+        while (!hasUpdated.get() && (new Date().getTime() - l < 20000)){
+            //wait
+        }
+
         return unseenResponseDto.get();
     }
 }

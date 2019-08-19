@@ -94,7 +94,7 @@ public class EventMessagePublisher {
 
             } else {
                 log.trace("Sending request message to "+ eventName);
-                nats.request(eventName, json, 20, TimeUnit.SECONDS, messageHandler);
+                nats.request(eventName, json, 10, TimeUnit.SECONDS, messageHandler);
             }
             return;
         }

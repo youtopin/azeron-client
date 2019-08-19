@@ -32,6 +32,7 @@ public class UnseenRetrieveService {
         try {
             if (locked) {
                 UnseenResponseDto unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery();
+                log.trace("unseen response "+ unseenResponseDto.toString());
                 if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
                     unseenResponseDto.getMessages().forEach(messageDto -> {
                         EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
