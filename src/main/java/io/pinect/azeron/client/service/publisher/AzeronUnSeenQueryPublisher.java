@@ -54,7 +54,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
             hasUpdated.set(true);
         });
 
-        while (!hasUpdated.get() && (new Date().getTime() - l < 20000)){
+        while (!hasUpdated.get() && (new Date().getTime() - l < 21000)){
             //wait
         }
 
