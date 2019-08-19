@@ -45,7 +45,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private void startPingTaskSchedule(){
         log.trace("Starting ping task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getPingIntervalSeconds(), TimeUnit.SECONDS);
-        periodicTrigger.setInitialDelay(azeronClientProperties.getPingIntervalSeconds() * 1000);
+        periodicTrigger.setInitialDelay(azeronClientProperties.getPingIntervalSeconds());
         this.pingSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
@@ -58,7 +58,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private void startUnseenRetrieveSchedule(){
         log.trace("Starting unseen retrieve task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnseenQueryIntervalSeconds(), TimeUnit.SECONDS);
-        periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds() * 1000);
+        periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds());
         this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {

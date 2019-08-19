@@ -38,6 +38,7 @@ public class AzeronSeenPublisher implements SeenPublisher {
 
     @Override
     public void publishSeen(String messageId) throws Exception {
+        log.trace("publishing seen for "+ messageId);
         String reqId = UUID.randomUUID().toString();
         SeenDto seenDto = SeenDto.builder().messageId(messageId).serviceName(serviceName).reqId(reqId).build();
         String value = null;

@@ -59,8 +59,9 @@ public class EventListenerRegistry {
         log.info("Re-registering all channels into Azeron.");
         for(String channelName: eventListenersMap.keySet()){
             try {
+                EventListener eventListener = eventListenersMap.get(channelName);
                 drop(channelName);
-                subscribe(eventListenersMap.get(channelName));
+                subscribe(eventListener);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

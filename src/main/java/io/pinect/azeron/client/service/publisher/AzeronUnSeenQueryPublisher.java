@@ -34,7 +34,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
     @Override
     public UnseenResponseDto publishQuery() throws Exception {
         UnseenQueryDto unseenQueryDto = UnseenQueryDto.builder().dateBefore(new Date().getTime() - ((azeronClientProperties.getUnseenQueryIntervalSeconds() + 1) * 1000)).serviceName(serviceName).build();
-        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(null);
+        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(UnseenResponseDto.builder().count(0).hasMore(false).build());
         sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, getObjectMapper().writeValueAsString(unseenQueryDto), PublishStrategy.BLOCKED, message -> {
             String messageBody = message.getBody();
             try {
