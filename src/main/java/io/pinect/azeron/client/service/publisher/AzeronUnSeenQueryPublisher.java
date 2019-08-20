@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.config.ChannelName;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
+import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.dto.in.UnseenResponseDto;
 import io.pinect.azeron.client.domain.dto.out.UnseenQueryDto;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
@@ -36,7 +37,9 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
     @Override
     public UnseenResponseDto publishQuery() throws Exception {
         UnseenQueryDto unseenQueryDto = UnseenQueryDto.builder().dateBefore(new Date().getTime() - ((azeronClientProperties.getUnseenQueryIntervalSeconds() + 1) * 1000)).serviceName(serviceName).build();
-        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(UnseenResponseDto.builder().messages(new ArrayList<>()).count(0).hasMore(false).build());
+        UnseenResponseDto defaultValue = UnseenResponseDto.builder().messages(new ArrayList<>()).count(0).hasMore(false).build();
+        defaultValue.setStatus(ResponseStatus.FAILED);
+        AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(defaultValue);
 
         AtomicBoolean hasUpdated = new AtomicBoolean(false);
 

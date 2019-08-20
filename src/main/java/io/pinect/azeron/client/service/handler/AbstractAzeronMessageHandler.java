@@ -10,12 +10,14 @@ import io.pinect.azeron.client.service.stage.MessageProcessorStage;
 import io.pinect.azeron.client.service.stage.SeenAfterProcessStage;
 import io.pinect.azeron.client.service.stage.SeenBeforeProcessStage;
 import io.pinect.azeron.client.util.Pipeline;
+import lombok.extern.log4j.Log4j2;
 import nats.client.Message;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 
+@Log4j2
 public abstract class AbstractAzeronMessageHandler<E> implements EventListener<E> {
     private final ObjectMapper objectMapper;
     private final SeenPublisher seenPublisher;
@@ -39,6 +41,15 @@ public abstract class AbstractAzeronMessageHandler<E> implements EventListener<E
         MessageDto messageDto = null;
         try {
             messageDto = getMessageDto(messageBody);
+        } catch (IOException e) {
+            log.error(e);
+            azeronErrorHandler().onError(e, null);
+        }
+    }
+
+    @Override
+    public void handle(MessageDto messageDto){
+        try {
             Lock lock = handlingLock.getLock(messageDto.getMessageId());
             boolean b = lock.tryLock();
             try {

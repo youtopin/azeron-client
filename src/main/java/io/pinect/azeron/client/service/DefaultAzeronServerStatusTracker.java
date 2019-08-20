@@ -17,9 +17,8 @@ public class DefaultAzeronServerStatusTracker implements AzeronServerStatusTrack
 
     @Override
     public synchronized void setStatus(Status s) {
-        log.debug("Latest Azeron status update: "+ s);
         boolean hasChanged = !status.equals(s);
-        log.debug("Azeron status changed: "+ hasChanged);
+        log.trace("Azeron status update: "+ s + " , changed: "+ hasChanged);
         this.status = s;
         if(hasChanged && isUp()){
             eventListenerRegistry.reRegisterAll();

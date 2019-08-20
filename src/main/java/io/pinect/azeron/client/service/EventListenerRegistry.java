@@ -3,6 +3,7 @@ package io.pinect.azeron.client.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.AtomicNatsHolder;
+import io.pinect.azeron.client.config.ChannelName;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.out.SubscriptionControlDto;
 import io.pinect.azeron.client.domain.dto.out.UnSubscribeControlDto;
@@ -60,7 +61,6 @@ public class EventListenerRegistry {
         for(String channelName: eventListenersMap.keySet()){
             try {
                 EventListener eventListener = eventListenersMap.get(channelName);
-                drop(channelName);
                 subscribe(eventListener);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
@@ -70,18 +70,24 @@ public class EventListenerRegistry {
 
     public void drop(String channelName){
         log.debug("Dropping channel: "+ channelName);
+
         try {
-            natsAtomicReference.get().publish("azeron.api.unsubscribe", objectMapper.writeValueAsString(
+            Subscription subscription = subscriptionMap.get(channelName);
+            if(subscription != null) {
+                subscription.close();
+            }
+        }catch (Exception e){
+            log.error(e);
+        }
+
+        try {
+            natsAtomicReference.get().publish(AZERON_UNSUBSCRIBE_API_NAME, objectMapper.writeValueAsString(
                     new UnSubscribeControlDto(channelName, serviceName)
             ));
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException", e);
         }
         eventListenersMap.remove(channelName);
-        Subscription subscription = subscriptionMap.get(channelName);
-        if(subscription != null) {
-            subscription.close();
-        }
     }
 
     public EventListener getEventListenerOfChannel(String channelName){
@@ -89,6 +95,9 @@ public class EventListenerRegistry {
     }
 
     private void subscribe(EventListener eventListener) throws JsonProcessingException {
+        Subscription subscription = subscriptionMap.get(eventListener.eventName());
+        if(subscription != null)
+            subscription.close();
         if(eventListener.useAzeron())
             subscribeWithAzeron(eventListener);
         else
@@ -174,13 +183,7 @@ public class EventListenerRegistry {
             log.debug("UnSubscribe for shutdown");
             Nats nats = natsAtomicReference.get();
             for(String channelName: eventListenersMap.keySet()){
-                try {
-                    SubscriptionControlDto subscriptionControlDto = getSubscriptionControlDto(eventListenersMap.get(channelName));
-                    String json = getSubscriptionControlJson(subscriptionControlDto);
-                    nats.publish(AZERON_UNSUBSCRIBE_API_NAME, json);
-                } catch (JsonProcessingException e) {
-                    log.error(e);
-                }
+                drop(channelName);
             }
         }
     }

@@ -1,6 +1,8 @@
 package io.pinect.azeron.client.service.api;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
+import io.pinect.azeron.client.domain.dto.ResponseStatus;
+import io.pinect.azeron.client.domain.dto.in.PongDto;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -18,14 +20,14 @@ public class HostBasedAzeronInstancePinger implements Pinger {
     }
 
     @Override
-    public AzeronServerStatusTracker.Status ping() {
+    public PongDto ping() {
         try {
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://" + azeronClientProperties.getAzeronServerHost() + "/api/v1/ping", String.class);
-            if(responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.hasBody() && responseEntity.getBody().toLowerCase().equals("pong"))
-                return AzeronServerStatusTracker.Status.UP;
+            ResponseEntity<PongDto> responseEntity = restTemplate.getForEntity("http://" + azeronClientProperties.getAzeronServerHost() + "/api/v1/ping", PongDto.class);
+            if(responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.hasBody())
+                return responseEntity.getBody();
         }catch (Exception e){
             log.error(e);
         }
-        return AzeronServerStatusTracker.Status.DOWN;
+        return PongDto.builder().status(ResponseStatus.FAILED).build();
     }
 }

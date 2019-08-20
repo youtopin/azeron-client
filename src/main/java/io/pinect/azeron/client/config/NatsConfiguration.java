@@ -1,11 +1,10 @@
 package io.pinect.azeron.client.config;
 
-import io.netty.channel.kqueue.KQueueEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.stateListener.NatsConnectionStateListener;
+import io.pinect.azeron.client.util.NatsConnectorProvider;
 import lombok.extern.log4j.Log4j2;
 import nats.client.Nats;
 import nats.client.NatsConnector;
@@ -16,9 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 @Log4j2
@@ -39,16 +35,9 @@ public class NatsConfiguration {
     public AtomicNatsHolder atomicNatsHolder(){
         NatsConfigModel natsConfig = natsConfigProvider.getNatsConfig();
         log.trace("Found nats config model "+ natsConfig);
-        NatsConnector natsConnector = new NatsConnector();
+        NatsConnector natsConnector = NatsConnectorProvider.getNatsConnector(natsConfig);
         natsConnector.addConnectionStateListener(new ApplicationEventPublishingConnectionStateListener(this.applicationContext));
         natsConnector.addConnectionStateListener(natsConnectionStateListener);
-        natsConnector.addHost(natsConfig.getProtocol() + "://"+ natsConfig.getHost());
-        natsConnector.automaticReconnect(true);
-        natsConnector.idleTimeout(natsConfig.getIdleTimeOut());
-        natsConnector.pedantic(natsConfig.isPedanic());
-        natsConnector.eventLoopGroup(new NioEventLoopGroup());
-        natsConnector.calllbackExecutor(new ScheduledThreadPoolExecutor(20));
-        natsConnector.reconnectWaitTime(5 , TimeUnit.SECONDS);
         Nats nats = natsConnector.connect();
         return new AtomicNatsHolder(nats);
     }

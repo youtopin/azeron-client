@@ -19,6 +19,7 @@ public class MessageDto implements Serializable {
     private long timeStamp;
     private JsonNode object;
     private String serviceName;
+    @Builder.Default
     private ProcessStatus status = ProcessStatus.FAILED;
 
     public enum ProcessStatus {

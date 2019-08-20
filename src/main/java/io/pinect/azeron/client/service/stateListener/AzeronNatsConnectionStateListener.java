@@ -1,6 +1,7 @@
 package io.pinect.azeron.client.service.stateListener;
 
 import io.pinect.azeron.client.AtomicNatsHolder;
+import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.NatsConnectionUpdater;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import lombok.extern.log4j.Log4j2;
@@ -15,9 +16,11 @@ import org.springframework.stereotype.Service;
 public class AzeronNatsConnectionStateListener implements NatsConnectionStateListener{
     private ConnectionStateListener.State state;
     private final NatsConnectionUpdater natsConnectionUpdater;
+    private final EventListenerRegistry eventListenerRegistry;
 
     @Autowired
-    public AzeronNatsConnectionStateListener(NatsConfigProvider natsConfigProvider, AtomicNatsHolder atomicNatsHolder, ApplicationContext applicationContext) {
+    public AzeronNatsConnectionStateListener(NatsConfigProvider natsConfigProvider, AtomicNatsHolder atomicNatsHolder, ApplicationContext applicationContext, EventListenerRegistry eventListenerRegistry) {
+        this.eventListenerRegistry = eventListenerRegistry;
         this.natsConnectionUpdater = new NatsConnectionUpdater(natsConfigProvider, atomicNatsHolder, applicationContext);
     }
 
@@ -29,9 +32,11 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
     @Override
     public void onConnectionStateChange(Nats nats, ConnectionStateListener.State state) {
         log.info("Nats state changed from "+ this.state + " to "+ state);
-
+        boolean hasChanged = !state.equals(this.state);
         switch (state){
             case CONNECTED:
+                if(hasChanged)
+                    eventListenerRegistry.reRegisterAll();
                 break;
             case DISCONNECTED:
                 natsConnectionUpdater.update(this);

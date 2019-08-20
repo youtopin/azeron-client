@@ -36,7 +36,7 @@ public class UnseenRetrieveService {
                 if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
                     unseenResponseDto.getMessages().forEach(messageDto -> {
                         EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
-                        eventListener.handle(messageDto.getObject().toString());
+                        eventListener.handle(messageDto);
                     });
                 }
             }else{

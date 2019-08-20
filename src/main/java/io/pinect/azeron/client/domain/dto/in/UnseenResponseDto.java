@@ -18,6 +18,7 @@ public class UnseenResponseDto extends BasicAzeronReponseDto {
     private int count;
     private List<MessageDto> messages;
 
+
     public UnseenResponseDto() {
         super(ResponseStatus.OK);
     }

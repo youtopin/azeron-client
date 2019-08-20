@@ -17,7 +17,10 @@ public class SingleNodeHandlingLock implements HandlingLock {
 
     @Override
     public Lock getLock(String id) {
-        return lockMap.computeIfAbsent(id, k -> new ReentrantLock());
+        Lock lock = lockMap.computeIfAbsent(id, k -> new ReentrantLock());
+        if(lock == null)
+            lockMap.get(id);
+        return lock;
     }
 
     @Override

@@ -20,6 +20,8 @@ public interface EventListener<E> extends MessageHandler {
 
     void handle(String messageBody);
 
+    void handle(MessageDto messageDto);
+
     interface AzeronErrorHandler {
         void onError(Exception e, @Nullable MessageDto messageDto);
     }
