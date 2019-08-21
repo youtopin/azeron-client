@@ -12,5 +12,6 @@ public class AzeronClientProperties {
     private String azeronServerHost = "localhost";
     private int pingIntervalSeconds = 10;
     private int unseenQueryIntervalSeconds = 20;
+    private int fallbackPublishIntervalSeconds = 20;
     private int unProcessedRecheckIntervalSeconds = 60;
 }

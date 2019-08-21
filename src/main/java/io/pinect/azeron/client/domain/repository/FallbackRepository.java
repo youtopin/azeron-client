@@ -14,6 +14,7 @@ import java.util.Objects;
 public interface FallbackRepository {
     void saveMessage(FallbackEntity fallbackEntity);
     void deleteMessage(String id);
+    void deleteMessage(FallbackEntity fallbackEntity);
     List<FallbackEntity> getMessages(int offset, int limit);
     int countAll();
 
@@ -28,6 +29,11 @@ public interface FallbackRepository {
 
         @Override
         public void deleteMessage(String id) {
+        }
+
+        @Override
+        public void deleteMessage(FallbackEntity fallbackEntity) {
+
         }
 
         @Override
