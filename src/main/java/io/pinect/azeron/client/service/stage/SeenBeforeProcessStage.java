@@ -25,7 +25,7 @@ public class SeenBeforeProcessStage implements Stage<MessageDto, AzeronHandlerPi
     @Override
     public boolean process(MessageDto messageDto, AzeronHandlerPiplineResult o) {
         if(handlerPolicy.equals(HandlerPolicy.NO_AZERON))
-            return false;
+            return true;
 
         if(handlerPolicy.equals(HandlerPolicy.SEEN_FIRST)){
             seenExecutor.execute(new Runnable() {
