@@ -41,6 +41,7 @@ public abstract class AbstractAzeronMessageHandler<E> implements EventListener<E
         MessageDto messageDto = null;
         try {
             messageDto = getMessageDto(messageBody);
+            handle(messageDto);
         } catch (IOException e) {
             log.error(e);
             azeronErrorHandler().onError(e, null);

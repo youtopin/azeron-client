@@ -96,12 +96,12 @@ public class EventListenerRegistry {
 
     private void subscribe(EventListener eventListener) throws JsonProcessingException {
         Subscription subscription = subscriptionMap.get(eventListener.eventName());
-        if(subscription != null)
-            subscription.close();
         if(eventListener.useAzeron())
             subscribeWithAzeron(eventListener);
         else
             subscribeToNats(eventListener);
+        if(subscription != null)
+            subscription.close();
     }
 
     private void subscribeWithAzeron(EventListener eventListener) throws JsonProcessingException {

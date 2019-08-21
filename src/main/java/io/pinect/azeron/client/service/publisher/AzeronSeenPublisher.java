@@ -56,7 +56,6 @@ public class AzeronSeenPublisher implements SeenPublisher {
 
         long timeNow = new Date().getTime();
         Request request = nats.request(ChannelName.AZERON_SEEN_CHANNEL_NAME, value, 5, TimeUnit.SECONDS, (MessageHandler) message -> {
-            System.out.println("Seen response received -> "+ message.getBody());
             try {
                 SeenResponseDto seenResponseDto = objectMapper.readValue(message.getBody(), SeenResponseDto.class);
                 if (seenResponseDto.getStatus().equals(ResponseStatus.OK)){
