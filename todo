@@ -1,1 +1,2 @@
+- Support multiple instance of nats for clustering
 - Add schedule to re publish messages from fallback repository
