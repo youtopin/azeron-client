@@ -10,13 +10,13 @@ import java.util.concurrent.TimeUnit;
 public class NatsConnectorProvider {
     public static NatsConnector getNatsConnector(NatsConfigModel natsConfig){
         NatsConnector natsConnector = new NatsConnector();
-        natsConnector.addHost(natsConfig.getProtocol() + "://" + natsConfig.getHost());
+        natsConnector.addHost(natsConfig.getProtocol() + "://" + natsConfig.getHost()+":"+natsConfig.getPort());
         natsConnector.automaticReconnect(true);
         natsConnector.idleTimeout(natsConfig.getIdleTimeOut());
         natsConnector.pedantic(natsConfig.isPedanic());
         natsConnector.reconnectWaitTime(2 , TimeUnit.SECONDS);
-        natsConnector.eventLoopGroup(new NioEventLoopGroup());
-        natsConnector.calllbackExecutor(new ScheduledThreadPoolExecutor(20));
+        natsConnector.eventLoopGroup(new NioEventLoopGroup(500));
+        natsConnector.calllbackExecutor(new ScheduledThreadPoolExecutor(200));
         natsConnector.pingInterval(5000);
         return natsConnector;
     }
