@@ -43,6 +43,7 @@ public class FallbackPublisherService extends EventMessagePublisher{
                 while (offset < i){
                     fallbackRepository.getMessages(offset, limit).forEach(fallbackEntity -> {
                         try {
+                            log.trace("Re publishing message " + fallbackEntity.getMessage());
                             sendMessage(fallbackEntity.getEventName(), fallbackEntity.getMessage(), fallbackEntity.getStrategy());
                             fallbackRepository.deleteMessage(fallbackEntity);
                         } catch (Exception e) {

@@ -48,6 +48,9 @@ public class EventMessagePublisher {
 
     void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
         switch (publishStrategy){
+            case AZERON_NO_FALLBACK:
+                sendAzeronMessage(eventName, message, false, messageHandler);
+                break;
             case BLOCKED:
                 sendMessageBlocked(eventName, message, messageHandler);
                 break;
@@ -123,6 +126,6 @@ public class EventMessagePublisher {
     }
 
     public enum PublishStrategy {
-        BLOCKED, AZERON, NATS
+        BLOCKED, AZERON, NATS, AZERON_NO_FALLBACK
     }
 }

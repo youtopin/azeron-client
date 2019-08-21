@@ -45,7 +45,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
 
         long l = new Date().getTime();
 
-        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, getObjectMapper().writeValueAsString(unseenQueryDto), PublishStrategy.AZERON, message -> {
+        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, getObjectMapper().writeValueAsString(unseenQueryDto), PublishStrategy.AZERON_NO_FALLBACK, message -> {
             String messageBody = message.getBody();
             try {
                 unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));

@@ -31,6 +31,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private final TaskScheduler azeronTaskScheduler;
     private ScheduledFuture<?> pingSchedule;
     private ScheduledFuture<?> unseenSchedule;
+    private ScheduledFuture<?> fallbackPulishSchedule;
     private final Pinger pinger;
 
     @Autowired
@@ -87,7 +88,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
         log.trace("Starting fallback publish task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getFallbackPublishIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getFallbackPublishIntervalSeconds());
-        this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
+        this.fallbackPulishSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
                 fallbackPublisherService.execute();
@@ -99,5 +100,6 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     public void destroy(){
         pingSchedule.cancel(true);
         unseenSchedule.cancel(true);
+        fallbackPulishSchedule.cancel(true);
     }
 }
