@@ -24,7 +24,7 @@ public class NatsConfiguration {
     private final NatsConnectionStateListener natsConnectionStateListener;
 
     @Autowired
-    public NatsConfiguration(@Lazy NatsConfigProvider natsConfigProvider, ApplicationContext applicationContext,@Lazy NatsConnectionStateListener natsConnectionStateListener) {
+    public NatsConfiguration(NatsConfigProvider natsConfigProvider, ApplicationContext applicationContext,@Lazy NatsConnectionStateListener natsConnectionStateListener) {
         this.natsConfigProvider = natsConfigProvider;
         this.applicationContext = applicationContext;
         this.natsConnectionStateListener = natsConnectionStateListener;
