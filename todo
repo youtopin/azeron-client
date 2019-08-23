@@ -1,1 +1,2 @@
+- Remove processing lock (or make it optional) and fix duplicate message processing by providing option to choose "if client should send unseen query" and send unseen reponse in individual channel with queue grouping.
 - Support multiple instance of nats for clustering
