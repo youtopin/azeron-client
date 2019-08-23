@@ -7,7 +7,7 @@ Azeron client is library to work with Azeron Server and nats.
 
 ## Features
 
-- Ability to choose to use nats directly or along azeron for message publishing
+- Ability to choose between using nats directly or Azeron for message publishing
 - Ability to choose between different types of event listening strategies
 - Provides fallback repository to resend messages after failure (when azeron is down)
 - Recovers un-ack messages from server
