@@ -16,6 +16,7 @@ public class NatsConfigModel {
     private List<String> hosts = Collections.singletonList("nats://localhost:4222");
     private boolean useEpoll;
     private int idleTimeOut;
-    private boolean pedanic;
+    private boolean pedantic;
     private int reconnectWaitSeconds;
+    private int keepAliveSeconds = 20;
 }

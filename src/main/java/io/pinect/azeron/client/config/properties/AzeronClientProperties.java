@@ -11,6 +11,7 @@ public class AzeronClientProperties {
     private boolean unSubscribeWhenShuttingDown = false;
     private String azeronServerHost = "localhost";
     private int pingIntervalSeconds = 10;
+    private boolean retrieveUnseen = true;
     private int unseenQueryIntervalSeconds = 20;
     private int fallbackPublishIntervalSeconds = 20;
     private int unProcessedRecheckIntervalSeconds = 60;

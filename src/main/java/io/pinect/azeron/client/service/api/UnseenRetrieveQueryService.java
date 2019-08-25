@@ -14,13 +14,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Log4j2
-public class UnseenRetrieveService {
+public class UnseenRetrieveQueryService {
     private final AzeronUnSeenQueryPublisher azeronUnSeenQueryPublisher;
     private final EventListenerRegistry eventListenerRegistry;
     private final Lock lock;
 
     @Autowired
-    public UnseenRetrieveService(AzeronUnSeenQueryPublisher azeronUnSeenQueryPublisher, EventListenerRegistry eventListenerRegistry) {
+    public UnseenRetrieveQueryService(AzeronUnSeenQueryPublisher azeronUnSeenQueryPublisher, EventListenerRegistry eventListenerRegistry) {
         this.azeronUnSeenQueryPublisher = azeronUnSeenQueryPublisher;
         this.eventListenerRegistry = eventListenerRegistry;
         this.lock = new ReentrantLock();

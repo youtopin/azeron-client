@@ -6,7 +6,7 @@ import io.pinect.azeron.client.domain.dto.in.PongDto;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.api.Pinger;
-import io.pinect.azeron.client.service.api.UnseenRetrieveService;
+import io.pinect.azeron.client.service.api.UnseenRetrieveQueryService;
 import io.pinect.azeron.client.service.publisher.FallbackPublisherService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private final AzeronClientProperties azeronClientProperties;
     private final EventListenerRegistry eventListenerRegistry;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
-    private final UnseenRetrieveService unseenRetrieveService;
+    private final UnseenRetrieveQueryService unseenRetrieveQueryService;
     private final FallbackPublisherService fallbackPublisherService;
     private final TaskScheduler azeronTaskScheduler;
     private ScheduledFuture<?> pingSchedule;
@@ -35,11 +35,11 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private final Pinger pinger;
 
     @Autowired
-    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveService unseenRetrieveService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
-        this.unseenRetrieveService = unseenRetrieveService;
+        this.unseenRetrieveQueryService = unseenRetrieveQueryService;
         this.fallbackPublisherService = fallbackPublisherService;
         this.azeronTaskScheduler = azeronTaskScheduler;
         this.pinger = pinger;
@@ -73,13 +73,15 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     }
 
     private void startUnseenRetrieveSchedule(){
+        if(!azeronClientProperties.isRetrieveUnseen())
+            return;
         log.trace("Starting unseen retrieve task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnseenQueryIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds());
         this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
-                unseenRetrieveService.execute();
+                unseenRetrieveQueryService.execute();
             }
         }, periodicTrigger);
     }
