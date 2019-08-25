@@ -2,6 +2,9 @@ package io.pinect.azeron.client.domain.model;
 
 import lombok.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,13 +13,7 @@ import lombok.*;
 @ToString
 public class NatsConfigModel {
     @Builder.Default
-    private String host = "localhost";
-    @Builder.Default
-    private String hostIp = "127.0.0.1";
-    @Builder.Default
-    private String protocol="nats";
-    @Builder.Default
-    private String port = "4222";
+    private List<String> hosts = Collections.singletonList("nats://localhost:4222");
     private boolean useEpoll;
     private int idleTimeOut;
     private boolean pedanic;

@@ -3,7 +3,7 @@ package io.pinect.azeron.client.service.api;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.in.InfoResultDto;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
-import io.pinect.azeron.client.service.NatsConfigChoserService;
+import io.pinect.azeron.client.util.NatsConfigurationMerge;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +14,21 @@ import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Log4j2
 public class HostBasedNatsConfigProvider implements NatsConfigProvider {
     private final RestTemplate restTemplate;
     private final AzeronClientProperties azeronClientProperties;
-    private final NatsConfigChoserService natsConfigChoserService;
     private final RetryTemplate retryTemplate;
 
 
-    public HostBasedNatsConfigProvider(RestTemplate restTemplate, AzeronClientProperties azeronClientProperties, NatsConfigChoserService natsConfigChoserService) {
+    public HostBasedNatsConfigProvider(RestTemplate restTemplate, AzeronClientProperties azeronClientProperties) {
         this.restTemplate = restTemplate;
         this.azeronClientProperties = azeronClientProperties;
-        this.natsConfigChoserService = natsConfigChoserService;
 
         FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
         backOffPolicy.setBackOffPeriod(5000); // 5 seconds
@@ -47,7 +50,7 @@ public class HostBasedNatsConfigProvider implements NatsConfigProvider {
                         if(infoResultDto.getResults() == null || infoResultDto.getResults().size() == 0)
                             throw new RuntimeException("Could not fetch info from server");
 
-                        return natsConfigChoserService.getBestNatsConfig(infoResultDto.getResults());
+                        return NatsConfigurationMerge.getMergedNatsConfig(infoResultDto.getResults());
                     }
                     throw new Exception("Failed to get server info");
                 }
@@ -57,4 +60,6 @@ public class HostBasedNatsConfigProvider implements NatsConfigProvider {
             throw new RuntimeException(throwable);
         }
     }
+
+
 }

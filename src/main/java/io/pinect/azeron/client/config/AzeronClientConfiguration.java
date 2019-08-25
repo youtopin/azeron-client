@@ -2,8 +2,6 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
-import io.pinect.azeron.client.service.AzeronNatsConfigChoserService;
-import io.pinect.azeron.client.service.NatsConfigChoserService;
 import io.pinect.azeron.client.service.api.HostBasedAzeronInstancePinger;
 import io.pinect.azeron.client.service.api.HostBasedNatsConfigProvider;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
@@ -78,16 +76,11 @@ public class AzeronClientConfiguration {
         return new SingleNodeHandlingLock();
     }
 
-    @Bean
-    @ConditionalOnMissingBean(NatsConfigChoserService.class)
-    public NatsConfigChoserService natsConfigChoserService(){
-        return new AzeronNatsConfigChoserService();
-    }
 
     @Bean
     @ConditionalOnMissingBean(NatsConfigProvider.class)
     public NatsConfigProvider natsConfigProvider(){
-        return new HostBasedNatsConfigProvider(new RestTemplate(), azeronClientProperties, natsConfigChoserService());
+        return new HostBasedNatsConfigProvider(new RestTemplate(), azeronClientProperties);
     }
 
     @Bean

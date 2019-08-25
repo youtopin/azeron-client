@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class NatsConnectorProvider {
     public static NatsConnector getNatsConnector(NatsConfigModel natsConfig){
         NatsConnector natsConnector = new NatsConnector();
-        natsConnector.addHost(natsConfig.getProtocol() + "://" + natsConfig.getHost()+":"+natsConfig.getPort());
+        natsConfig.getHosts().forEach(natsConnector::addHost);
         natsConnector.automaticReconnect(true);
         natsConnector.idleTimeout(natsConfig.getIdleTimeOut());
         natsConnector.pedantic(natsConfig.isPedanic());
