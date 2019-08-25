@@ -6,8 +6,6 @@ import io.pinect.azeron.client.service.api.HostBasedAzeronInstancePinger;
 import io.pinect.azeron.client.service.api.HostBasedNatsConfigProvider;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.api.Pinger;
-import io.pinect.azeron.client.service.lock.HandlingLock;
-import io.pinect.azeron.client.service.lock.SingleNodeHandlingLock;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -69,13 +67,6 @@ public class AzeronClientConfiguration {
 
         return template;
     }
-
-    @Bean
-    @ConditionalOnMissingBean(HandlingLock.class)
-    public HandlingLock processingLock(){
-        return new SingleNodeHandlingLock();
-    }
-
 
     @Bean
     @ConditionalOnMissingBean(NatsConfigProvider.class)
