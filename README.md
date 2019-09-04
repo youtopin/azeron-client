@@ -1,5 +1,5 @@
 # azeron-client
-Works with [Azeron Server](https://github.com/pinect-io/azeron-server), The scalable and reliable messaging library, Wraps nats.io and uses Java Spring framework
+Works with [Azeron Server](https://github.com/sepehr-gh/azeron-server), The scalable and reliable messaging library, Wraps nats.io and uses Java Spring framework
 
 ---
 
@@ -26,7 +26,7 @@ build with maven
 
 	mvn clean install
 
-use azeron in your maven POM dependencies
+use Azeron in your maven POM dependencies
 
 	<dependency>
 		<groupId>io.pinect</groupId>
@@ -43,7 +43,7 @@ Annotate your Spring Boot Application with `@EnableAzeronClient`
 	public class AzeronConfiguration {
 	}
 
-### Implement new clustring methods
+### Implement new clustering methods
 
 It does not really matter how do you cluster your application. You can see our [example with eureka](https://github.com/sepehr-gh/azeron-examples/tree/master/azeron-client-eureka)
 
@@ -145,9 +145,32 @@ Different policies are:
 - **SEEN_ASYNC**: Receives message, process it, sends seen in new thread after process is complete
 - **NO_AZERON**: Does not send back any seen or acknowledgement.
 
+##### Using newly created listener
+
+Now your have to register your new listener in Azeron message registry.
+
+    @Configuration
+    public class AzeronConfiguration {
+        private final FullStrategyListener fullStrategyListener;
+        private final EventListenerRegistry eventListenerRegistry; //Azeron message registry
+    
+        @Autowired
+        public AzeronConfiguration(FullStrategyListener fullStrategyListenerEventListenerRegistry eventListenerRegistry) {
+            this.fullStrategyListener = fullStrategyListener;
+            this.eventListenerRegistry = eventListenerRegistry;
+        }
+    
+        //registering
+        @PostConstruct
+        public void registerServices(){
+            eventListenerRegistry.register(fullStrategyListener);
+        }
+    }
+
+
 ### Publish Message
 
-In order to create new message publisher service, impelement `EventMessagePublisher` from ` io.pinect.azeron.client.service.publisher`. Example:
+In order to create new message publisher service, implement `EventMessagePublisher` from ` io.pinect.azeron.client.service.publisher`. Example:
 
 	@Service
 	@Log4j2
@@ -172,10 +195,10 @@ In order to create new message publisher service, impelement `EventMessagePublis
 
 Different types of Publish Strategy:
 
-- **AZERON**: Sends message using azeron, contails fallback repository to resend if failed
-- **BLOCKED**: Sends message using azeron, retries till message is successfully sent.
-- **NATS**: Sends message using nats (Does not check if Azeron Servcer is up! Message is sent as long as nats is connected)
-- **AZERON_NO_FALLBACK**: Sends message using azeron, does not provide fallback repository. If message sending is failed, its failed!
+- **AZERON**: Sends message using Azeron, contains fallback repository to resend if failed
+- **BLOCKED**: Sends message using Azeron, retries till message is successfully sent.
+- **NATS**: Sends message using Nats (Does not check if Azeron Server is up! Message is sent as long as nats is connected)
+- **AZERON_NO_FALLBACK**: Sends message using Azeron, does not provide fallback repository. If message sending is failed, its failed!
 
 ## Configuration
 
