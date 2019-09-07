@@ -1,5 +1,6 @@
 package io.pinect.azeron.client.util;
 
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.pinect.azeron.client.domain.model.NatsConfigModel;
 import nats.client.NatsConnector;
@@ -16,7 +17,11 @@ public class NatsConnectorProvider {
         natsConnector.idleTimeout(natsConfig.getIdleTimeOut());
         natsConnector.pedantic(natsConfig.isPedantic());
         natsConnector.reconnectWaitTime(2 , TimeUnit.SECONDS);
-        natsConnector.eventLoopGroup(new NioEventLoopGroup(500));
+        if (natsConfig.isUseEpoll()) {
+            natsConnector.eventLoopGroup(new EpollEventLoopGroup(500));
+        }else {
+            natsConnector.eventLoopGroup(new NioEventLoopGroup(500));
+        }
         ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(200);
         scheduledThreadPoolExecutor.setRemoveOnCancelPolicy(true);
         scheduledThreadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());

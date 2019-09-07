@@ -5,7 +5,7 @@ public class PublishException extends Exception {
     private String messageText;
 
     public PublishException(String serviceName, String messageText) {
-        super("Failed to publish message to " + serviceName);
+        super("Failed to publish message to " + serviceName + " | text -> "+ messageText);
         this.serviceName = serviceName;
         this.messageText = messageText;
     }
