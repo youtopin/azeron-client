@@ -54,7 +54,7 @@ public class ApplicationInitializer {
     }
 
     private void startPingTaskSchedule(){
-        log.trace("Starting ping task schedule");
+        log.info("Starting ping task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getPingIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getPingIntervalSeconds());
         this.pingSchedule = azeronTaskScheduler.schedule(new Runnable() {
@@ -76,7 +76,7 @@ public class ApplicationInitializer {
     private void startUnseenRetrieveSchedule(){
         if(!azeronClientProperties.isRetrieveUnseen())
             return;
-        log.trace("Starting unseen retrieve task schedule");
+        log.info("Starting unseen retrieve task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getUnseenQueryIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getUnseenQueryIntervalSeconds());
         this.unseenSchedule = azeronTaskScheduler.schedule(new Runnable() {
@@ -88,7 +88,7 @@ public class ApplicationInitializer {
     }
 
     private void startFallbackPublishSchedule(){
-        log.trace("Starting fallback publish task schedule");
+        log.info("Starting fallback publish task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getFallbackPublishIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getFallbackPublishIntervalSeconds());
         this.fallbackPulishSchedule = azeronTaskScheduler.schedule(new Runnable() {
