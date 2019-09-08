@@ -47,7 +47,7 @@ public class ApplicationInitializer {
     }
 
     @PostConstruct
-    public void initialize(ApplicationReadyEvent applicationReadyEvent) {
+    public void initialize() {
         log.info("Initilizing application events");
         startPingTaskSchedule();
         startUnseenRetrieveSchedule();
