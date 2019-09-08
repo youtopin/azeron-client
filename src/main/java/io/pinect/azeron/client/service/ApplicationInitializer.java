@@ -1,4 +1,4 @@
-package io.pinect.azeron.client.config;
+package io.pinect.azeron.client.service;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
@@ -16,13 +16,14 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Component
 @Log4j2
-public class ApplicationStartupListener implements ApplicationListener<ApplicationReadyEvent> {
+public class ApplicationInitializer {
     private final AzeronClientProperties azeronClientProperties;
     private final EventListenerRegistry eventListenerRegistry;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
@@ -35,7 +36,7 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     private final Pinger pinger;
 
     @Autowired
-    public ApplicationStartupListener(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public ApplicationInitializer(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
@@ -45,8 +46,9 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
         this.pinger = pinger;
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+    @PostConstruct
+    public void initialize(ApplicationReadyEvent applicationReadyEvent) {
+        log.info("Initilizing application events");
         startPingTaskSchedule();
         startUnseenRetrieveSchedule();
         startFallbackPublishSchedule();

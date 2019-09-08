@@ -11,13 +11,11 @@ import nats.client.NatsConnector;
 import nats.client.spring.ApplicationEventPublishingConnectionStateListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.*;
 
 @Configuration
 @Log4j2
+@ComponentScan(basePackages = "io.pinect")
 public class NatsConfiguration {
     private final ApplicationContext applicationContext;
     private final NatsConfigProvider natsConfigProvider;
