@@ -46,7 +46,6 @@ public class ApplicationInitializer {
         this.pinger = pinger;
     }
 
-    @PostConstruct
     public void initialize() {
         log.info("Initilizing application events");
         startPingTaskSchedule();
@@ -102,8 +101,11 @@ public class ApplicationInitializer {
 
     @PreDestroy
     public void destroy(){
-        pingSchedule.cancel(true);
-        unseenSchedule.cancel(true);
-        fallbackPulishSchedule.cancel(true);
+        if(pingSchedule != null)
+            pingSchedule.cancel(true);
+        if(unseenSchedule != null)
+            unseenSchedule.cancel(true);
+        if(fallbackPulishSchedule != null)
+            fallbackPulishSchedule.cancel(true);
     }
 }
