@@ -35,13 +35,11 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
     @Override
     public void onConnectionStateChange(Nats nats, ConnectionStateListener.State state) {
         log.info("Nats state changed from "+ this.state + " to "+ state);
-        boolean hasChanged = !state.equals(this.state);
         switch (state){
             case CONNECTED:
-                if(hasChanged){
-                    eventListenerRegistry.reRegisterAll();
-                    applicationInitializer.initialize();
-                }
+                eventListenerRegistry.reRegisterAll();
+                applicationInitializer.destroy();
+                applicationInitializer.initialize();
                 break;
             case DISCONNECTED:
                 natsConnectionUpdater.update(this);
