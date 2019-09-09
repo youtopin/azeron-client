@@ -50,7 +50,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
         log.info("Unseen query -> "+ unseenQueryDto +" , "+ json);
 
 
-        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, json, PublishStrategy.AZERON_NO_FALLBACK, message -> {
+        sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, json, PublishStrategy.NATS, message -> {
             String messageBody = message.getBody();
             try {
                 unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));
@@ -59,7 +59,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
                 throw new RuntimeException(e);
             }
             hasUpdated.set(true);
-        });
+        }, true);
 
         while (!hasUpdated.get() && (new Date().getTime() - l < 21000)){
             //wait

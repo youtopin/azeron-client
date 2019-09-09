@@ -43,48 +43,62 @@ public class EventMessagePublisher {
     }
 
     public void sendMessage(String eventName, String message, PublishStrategy publishStrategy) throws Exception {
-        sendMessage(eventName, message, publishStrategy, null);
+        sendMessage(eventName, message, publishStrategy, null, false);
+    }
+
+    public void sendRawMessage(String eventName, String message, PublishStrategy publishStrategy) throws Exception {
+        sendMessage(eventName, message, publishStrategy, null, true);
     }
 
     void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
+        sendMessage(eventName, message, publishStrategy, messageHandler, false);
+    }
+
+    void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler, boolean isRaw) throws Exception {
         switch (publishStrategy){
             case AZERON_NO_FALLBACK:
-                sendAzeronMessage(eventName, message, false, messageHandler);
+                sendAzeronMessage(eventName, message, false, messageHandler, isRaw);
                 break;
             case BLOCKED:
-                sendMessageBlocked(eventName, message, messageHandler);
+                sendMessageBlocked(eventName, message, messageHandler, isRaw);
                 break;
             case NATS:
-                sendNatsMessage(eventName, message, true, messageHandler);
+                sendNatsMessage(eventName, message, true, messageHandler, isRaw);
                 break;
             case AZERON:
-                sendAzeronMessage(eventName, message, true, messageHandler);
+                sendAzeronMessage(eventName, message, true, messageHandler, isRaw);
                 break;
         }
     }
 
 
-    private void sendMessageBlocked(String eventName, String message, @Nullable MessageHandler messageHandler) throws Exception {
+    private void sendMessageBlocked(String eventName, String message, @Nullable MessageHandler messageHandler, boolean isRaw) throws Exception {
         eventPublishRetryTemplate.execute(new RetryCallback<Void, Exception>() {
             @Override
             public Void doWithRetry(RetryContext retryContext) throws Exception {
-                sendAzeronMessage(eventName, message, false, messageHandler);
+                sendAzeronMessage(eventName, message, false, messageHandler, isRaw);
                 return null;
             }
         });
     }
 
-    private void sendAzeronMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
-        publish(eventName, message, true, fallback, PublishStrategy.AZERON, messageHandler);
+    private void sendAzeronMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler, boolean isRaw) throws IOException, PublishException {
+        publish(eventName, message, true, fallback, PublishStrategy.AZERON, messageHandler, isRaw);
     }
 
-    private void sendNatsMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
-        publish(eventName, message, false, fallback, PublishStrategy.NATS, messageHandler);
+    private void sendNatsMessage(String eventName, String message, boolean fallback, @Nullable MessageHandler messageHandler, boolean isRaw) throws IOException, PublishException {
+        publish(eventName, message, false, fallback, PublishStrategy.NATS, messageHandler, isRaw);
     }
 
-    private void publish(String eventName, String message, boolean azeron, boolean fallback, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws IOException, PublishException {
-        MessageDto messageDto = getMessageDto(serviceName, eventName, message);
-        String json = getJson(messageDto);
+    private void publish(String eventName, String message, boolean azeron, boolean fallback, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler, boolean isRaw) throws IOException, PublishException {
+        String json;
+        MessageDto messageDto = null;
+        if(!isRaw){
+            messageDto = getMessageDto(serviceName, eventName, message);
+            json = getJson(messageDto);
+        }else{
+            json = message;
+        }
         Nats nats = natsAtomicReference.get();
         if(!azeron || azeronServerStatusTracker.isUp()){
             if(nats.isConnected()) {
@@ -100,7 +114,7 @@ public class EventMessagePublisher {
             }
         }
 
-        if(fallback)
+        if(fallback && !isRaw)
             handleFallback(messageDto, eventName, publishStrategy);
 
         throw new PublishException(serviceName, message);
