@@ -6,7 +6,7 @@
 
     <groupId>io.pinect</groupId>
     <artifactId>azeron-client</artifactId>
-    <version>1.0.12-SNAPSHOT</version>
+    <version>1.0.13-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
