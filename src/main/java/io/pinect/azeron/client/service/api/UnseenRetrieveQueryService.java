@@ -31,14 +31,17 @@ public class UnseenRetrieveQueryService {
         boolean locked = lock.tryLock();
         try {
             if (locked) {
-                UnseenResponseDto unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery();
-                log.trace("unseen response "+ unseenResponseDto.toString());
-                if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
-                    unseenResponseDto.getMessages().forEach(messageDto -> {
-                        EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
-                        eventListener.handle(messageDto);
-                    });
+                UnseenResponseDto unseenResponseDto;
+                while((unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery()).isHasMore()){
+                    log.trace("unseen response "+ unseenResponseDto.toString());
+                    if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
+                        unseenResponseDto.getMessages().forEach(messageDto -> {
+                            EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
+                            eventListener.handle(messageDto);
+                        });
+                    }
                 }
+
             }else{
                 log.warn("UnSeen retrieve service execution is called in short period. Previous call is not finished yet and is holding the lock.");
             }
