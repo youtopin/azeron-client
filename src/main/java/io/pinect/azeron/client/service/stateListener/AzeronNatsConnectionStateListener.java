@@ -1,7 +1,7 @@
 package io.pinect.azeron.client.service.stateListener;
 
 import io.pinect.azeron.client.AtomicNatsHolder;
-import io.pinect.azeron.client.service.ApplicationInitializer;
+import io.pinect.azeron.client.service.TaskScheduleInitializerService;
 import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.NatsConnectionUpdater;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
@@ -18,12 +18,12 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
     private ConnectionStateListener.State state;
     private final NatsConnectionUpdater natsConnectionUpdater;
     private final EventListenerRegistry eventListenerRegistry;
-    private final ApplicationInitializer applicationInitializer;
+    private final TaskScheduleInitializerService taskScheduleInitializerService;
 
     @Autowired
-    public AzeronNatsConnectionStateListener(NatsConfigProvider natsConfigProvider, AtomicNatsHolder atomicNatsHolder, ApplicationContext applicationContext, EventListenerRegistry eventListenerRegistry, ApplicationInitializer applicationInitializer) {
+    public AzeronNatsConnectionStateListener(NatsConfigProvider natsConfigProvider, AtomicNatsHolder atomicNatsHolder, ApplicationContext applicationContext, EventListenerRegistry eventListenerRegistry, TaskScheduleInitializerService taskScheduleInitializerService) {
         this.eventListenerRegistry = eventListenerRegistry;
-        this.applicationInitializer = applicationInitializer;
+        this.taskScheduleInitializerService = taskScheduleInitializerService;
         this.natsConnectionUpdater = new NatsConnectionUpdater(natsConfigProvider, atomicNatsHolder, applicationContext);
     }
 
@@ -38,12 +38,12 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
         switch (state){
             case CONNECTED:
                 eventListenerRegistry.reRegisterAll();
-                applicationInitializer.destroy();
-                applicationInitializer.initialize();
+                taskScheduleInitializerService.destroy();
+                taskScheduleInitializerService.initialize();
                 break;
             case DISCONNECTED:
                 natsConnectionUpdater.update(this);
-                applicationInitializer.destroy();
+                taskScheduleInitializerService.destroy();
                 break;
         }
 

@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @Log4j2
-public class ApplicationInitializer {
+public class TaskScheduleInitializerService {
     private final AzeronClientProperties azeronClientProperties;
     private final EventListenerRegistry eventListenerRegistry;
     private final AzeronServerStatusTracker azeronServerStatusTracker;
@@ -36,7 +36,7 @@ public class ApplicationInitializer {
     private final Pinger pinger;
 
     @Autowired
-    public ApplicationInitializer(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
@@ -47,7 +47,7 @@ public class ApplicationInitializer {
     }
 
     public void initialize() {
-        log.info("Initilizing application events");
+        log.info("Initializing scheduled tasks");
         startPingTaskSchedule();
         startUnseenRetrieveSchedule();
         startFallbackPublishSchedule();
