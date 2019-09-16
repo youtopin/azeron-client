@@ -14,4 +14,5 @@ public class AzeronClientProperties {
     private boolean retrieveUnseen = true;
     private int unseenQueryIntervalSeconds = 20;
     private int fallbackPublishIntervalSeconds = 20;
+    private int seenPublishSemaphoreSize = 20;
 }
