@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +68,10 @@ public class EventListenerRegistry {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public List<EventListener> getEventListeners(){
+        return new ArrayList<>(eventListenersMap.values());
     }
 
     public void drop(String channelName){

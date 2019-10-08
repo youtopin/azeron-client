@@ -1,12 +1,14 @@
 package io.pinect.azeron.client.service;
 
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
+import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.dto.in.PongDto;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.api.UnseenRetrieveQueryService;
+import io.pinect.azeron.client.service.handler.EventListener;
 import io.pinect.azeron.client.service.publisher.FallbackPublisherService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +69,24 @@ public class TaskScheduleInitializerService {
                 if(status.equals(AzeronServerStatusTracker.Status.UP) && pongDto.isAskedForDiscovery()){
                     if(pongDto.isDiscovered())
                         return;
-                    eventListenerRegistry.reRegisterAll();
+                    reRegisterIfNeeded();
                 }
             }
         }, periodicTrigger);
+    }
+
+    private void reRegisterIfNeeded() {
+        boolean b = false;
+        for (EventListener eventListener : eventListenerRegistry.getEventListeners()) {
+            if(eventListener.policy().equals(HandlerPolicy.NO_AZERON))
+                continue;
+            else {
+                b = true;
+                break;
+            }
+        }
+        if(b)
+            eventListenerRegistry.reRegisterAll();
     }
 
     private void startUnseenRetrieveSchedule(){
