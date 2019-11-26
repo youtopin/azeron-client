@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString
-public class UnseenResponseDto extends BasicAzeronReponseDto {
+public class UnseenResponseDto extends BasicAzeronResponseDto {
     private boolean hasMore;
     private int count;
     private List<MessageDto> messages;

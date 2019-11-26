@@ -15,7 +15,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @ToString
-public class InfoResultDto extends BasicAzeronReponseDto {
+public class InfoResultDto extends BasicAzeronResponseDto {
     private List<InfoResult> results;
 
     public InfoResultDto(){

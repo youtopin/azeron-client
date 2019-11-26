@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class BasicAzeronReponseDto {
+public class BasicAzeronResponseDto {
     private ResponseStatus status;
 }

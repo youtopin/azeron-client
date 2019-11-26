@@ -12,6 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SeenResponseDto extends BasicAzeronReponseDto {
+public class SeenResponseDto extends BasicAzeronResponseDto {
     private String reqId;
 }
