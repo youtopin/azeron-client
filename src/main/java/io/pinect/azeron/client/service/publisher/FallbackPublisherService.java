@@ -44,7 +44,7 @@ public class FallbackPublisherService extends EventMessagePublisher{
                     fallbackRepository.getMessages(offset, limit).forEach(fallbackEntity -> {
                         try {
                             log.trace("Re publishing message " + fallbackEntity.getMessage());
-                            sendMessage(fallbackEntity.getEventName(), fallbackEntity.getMessage(), fallbackEntity.getStrategy());
+                            sendMessage(fallbackEntity.getEventName(), fallbackEntity.getMessage(), PublishStrategy.AZERON_NO_FALLBACK);
                             fallbackRepository.deleteMessage(fallbackEntity);
                         } catch (Exception e) {
                             log.error("Failed to send message from fallback repository.", e);
