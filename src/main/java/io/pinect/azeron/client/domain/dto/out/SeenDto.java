@@ -7,6 +7,7 @@ import lombok.*;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
@@ -17,10 +18,11 @@ import java.util.List;
 @ToString
 public class SeenDto {
     private String messageId;
-    private List<String> messageIds;
+    private Set<String> messageIds;
     @NotNull
     private String serviceName;
     private String reqId;
+    private String channelName;
 
     @JsonIgnore
     @AssertTrue

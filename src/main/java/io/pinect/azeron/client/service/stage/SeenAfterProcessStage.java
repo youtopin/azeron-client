@@ -29,7 +29,7 @@ public class SeenAfterProcessStage implements Stage<MessageDto, AzeronHandlerPip
                 @Override
                 public void run() {
                     try {
-                        seenPublisher.publishSeen(messageDto.getMessageId());
+                        seenPublisher.publishSeen(messageDto.getMessageId(), messageDto.getChannelName());
                     } catch (Exception e) {
                         azeronErrorHandler.onError(e, messageDto);
                     }
@@ -37,7 +37,7 @@ public class SeenAfterProcessStage implements Stage<MessageDto, AzeronHandlerPip
             });
         }else if(handlerPolicy.equals(HandlerPolicy.FULL)){
             try {
-                seenPublisher.publishSeen(messageDto.getMessageId());
+                seenPublisher.publishSeen(messageDto.getMessageId(), messageDto.getChannelName());
             } catch (Exception e) {
                 azeronErrorHandler.onError(e, messageDto);
             }

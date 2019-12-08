@@ -32,7 +32,7 @@ public class SeenBeforeProcessStage implements Stage<MessageDto, AzeronHandlerPi
                 @Override
                 public void run() {
                     try {
-                        seenPublisher.publishSeen(messageDto.getMessageId());
+                        seenPublisher.publishSeen(messageDto.getMessageId(), messageDto.getChannelName());
                     } catch (Exception e) {
                         azeronErrorHandler.onError(e, messageDto);
                     }
