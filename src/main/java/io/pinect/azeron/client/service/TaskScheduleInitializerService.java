@@ -63,7 +63,7 @@ public class TaskScheduleInitializerService {
             @Override
             public void run() {
                 PongDto pongDto = pinger.ping();
-                log.trace("Pong result -> "+pongDto);
+                log.debug("Pong result -> "+pongDto);
                 AzeronServerStatusTracker.Status status = pongDto.getStatus().equals(ResponseStatus.OK) ? AzeronServerStatusTracker.Status.UP : AzeronServerStatusTracker.Status.DOWN;
                 azeronServerStatusTracker.setStatus(status);
                 if(status.equals(AzeronServerStatusTracker.Status.UP) && pongDto.isAskedForDiscovery()){
@@ -78,9 +78,7 @@ public class TaskScheduleInitializerService {
     private void reRegisterIfNeeded() {
         boolean b = false;
         for (EventListener eventListener : eventListenerRegistry.getEventListeners()) {
-            if(eventListener.policy().equals(HandlerPolicy.NO_AZERON))
-                continue;
-            else {
+            if(!eventListener.policy().equals(HandlerPolicy.NO_AZERON)){
                 b = true;
                 break;
             }
