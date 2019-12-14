@@ -23,7 +23,7 @@ public class NatsConnectionUpdater {
         this.atomicNatsHolder = atomicNatsHolder;
     }
 
-    public void update(NatsConnectionStateListener natsConnectionStateListener){
+    public synchronized void update(NatsConnectionStateListener natsConnectionStateListener){
         log.info("Updating nats info");
         try {
             Nats nats = atomicNatsHolder.getNatsAtomicReference().get();

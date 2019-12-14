@@ -1,26 +1,26 @@
 package io.pinect.azeron.client.service;
 
+import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.dto.in.PongDto;
-import io.pinect.azeron.client.service.AzeronServerStatusTracker;
-import io.pinect.azeron.client.service.EventListenerRegistry;
+import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.api.UnseenRetrieveQueryService;
 import io.pinect.azeron.client.service.handler.EventListener;
 import io.pinect.azeron.client.service.publisher.FallbackPublisherService;
+import io.pinect.azeron.client.service.stateListener.NatsConnectionStateListener;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -32,19 +32,22 @@ public class TaskScheduleInitializerService {
     private final UnseenRetrieveQueryService unseenRetrieveQueryService;
     private final FallbackPublisherService fallbackPublisherService;
     private final TaskScheduler azeronTaskScheduler;
+    private final NatsReconnectForceService natsReconnectForceService;
     private ScheduledFuture<?> pingSchedule;
     private ScheduledFuture<?> unseenSchedule;
-    private ScheduledFuture<?> fallbackPulishSchedule;
+    private ScheduledFuture<?> fallbackPublishSchedule;
+    private ScheduledFuture<?> natsConnectionCheckSchedule;
     private final Pinger pinger;
 
     @Autowired
-    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
+    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, AtomicNatsHolder atomicNatsHolder, TaskScheduler azeronTaskScheduler, NatsConnectionStateListener natsConnectionStateListener, NatsConfigProvider natsConfigProvider, ApplicationContext applicationContext, NatsReconnectForceService natsReconnectForceService, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.unseenRetrieveQueryService = unseenRetrieveQueryService;
         this.fallbackPublisherService = fallbackPublisherService;
         this.azeronTaskScheduler = azeronTaskScheduler;
+        this.natsReconnectForceService = natsReconnectForceService;
         this.pinger = pinger;
     }
 
@@ -105,10 +108,22 @@ public class TaskScheduleInitializerService {
         log.info("Starting fallback publish task schedule");
         PeriodicTrigger periodicTrigger = new PeriodicTrigger(azeronClientProperties.getFallbackPublishIntervalSeconds(), TimeUnit.SECONDS);
         periodicTrigger.setInitialDelay(azeronClientProperties.getFallbackPublishIntervalSeconds());
-        this.fallbackPulishSchedule = azeronTaskScheduler.schedule(new Runnable() {
+        this.fallbackPublishSchedule = azeronTaskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
                 fallbackPublisherService.execute();
+            }
+        }, periodicTrigger);
+    }
+
+    private void startConnectionCheckSchedule(){
+        log.info("starting connection check schedule");
+        PeriodicTrigger periodicTrigger = new PeriodicTrigger(10, TimeUnit.SECONDS);
+        periodicTrigger.setInitialDelay(10000);
+        this.natsConnectionCheckSchedule = azeronTaskScheduler.schedule(new Runnable() {
+            @Override
+            public void run() {
+                natsReconnectForceService.forceNatsReconnect();
             }
         }, periodicTrigger);
     }
@@ -119,7 +134,9 @@ public class TaskScheduleInitializerService {
             pingSchedule.cancel(true);
         if(unseenSchedule != null)
             unseenSchedule.cancel(true);
-        if(fallbackPulishSchedule != null)
-            fallbackPulishSchedule.cancel(true);
+        if(fallbackPublishSchedule != null)
+            fallbackPublishSchedule.cancel(true);
+        if(natsConnectionCheckSchedule != null)
+            natsConnectionCheckSchedule.cancel(true);
     }
 }

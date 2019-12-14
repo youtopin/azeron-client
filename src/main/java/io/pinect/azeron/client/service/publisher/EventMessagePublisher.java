@@ -7,6 +7,7 @@ import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.exception.PublishException;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
+import io.pinect.azeron.client.service.NatsReconnectForceService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import nats.client.MessageHandler;

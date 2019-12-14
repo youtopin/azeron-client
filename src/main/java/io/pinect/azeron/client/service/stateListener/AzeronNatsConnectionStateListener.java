@@ -42,11 +42,10 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
                 taskScheduleInitializerService.initialize();
                 break;
             case DISCONNECTED:
-                natsConnectionUpdater.update(this);
                 taskScheduleInitializerService.destroy();
+                natsConnectionUpdater.update(this);
                 break;
         }
-
         this.state = state;
     }
 }
