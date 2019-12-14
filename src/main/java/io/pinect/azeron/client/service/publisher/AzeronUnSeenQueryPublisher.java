@@ -50,8 +50,8 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
 
 
         sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, json, PublishStrategy.NATS, message -> {
-            log.debug("Unseen response received");
             String messageBody = message.getBody();
+            log.debug("Unseen response received, body: "+ messageBody);
             try {
                 unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));
             } catch (IOException e) {
