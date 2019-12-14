@@ -34,7 +34,7 @@ public class UnseenRetrieveQueryService {
                 UnseenResponseDto unseenResponseDto;
                 do {
                     unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery();
-                    log.trace("unseen response "+ unseenResponseDto.toString());
+                    log.debug("unseen response "+ unseenResponseDto.toString());
                     if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
                         unseenResponseDto.getMessages().forEach(messageDto -> {
                             EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
