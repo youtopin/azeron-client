@@ -37,7 +37,10 @@ public class UnseenRetrieveQueryService {
                     if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
                         unseenResponseDto.getMessages().forEach(messageDto -> {
                             EventListener eventListener = eventListenerRegistry.getEventListenerOfChannel(messageDto.getChannelName());
-                            eventListener.handle(messageDto);
+                            if(eventListener != null){
+                                log.debug("Passing unseen message with id " + messageDto.getMessageId() + " to event listener.");
+                                eventListener.handle(messageDto);
+                            }
                         });
                     }
                 }
