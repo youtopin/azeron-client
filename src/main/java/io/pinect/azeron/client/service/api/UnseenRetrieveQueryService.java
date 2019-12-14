@@ -32,7 +32,8 @@ public class UnseenRetrieveQueryService {
         try {
             if (locked) {
                 UnseenResponseDto unseenResponseDto;
-                while((unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery()).isHasMore()){
+                do {
+                    unseenResponseDto = azeronUnSeenQueryPublisher.publishQuery();
                     log.trace("unseen response "+ unseenResponseDto.toString());
                     if(unseenResponseDto.getStatus().equals(ResponseStatus.OK)){
                         unseenResponseDto.getMessages().forEach(messageDto -> {
@@ -40,11 +41,12 @@ public class UnseenRetrieveQueryService {
                             if(eventListener != null){
                                 log.debug("Passing unseen message with id " + messageDto.getMessageId() + " to event listener.");
                                 eventListener.handle(messageDto);
+                            }else {
+                                log.debug("Channel not found for message "+ messageDto.getMessageId());
                             }
                         });
                     }
-                }
-
+                }while(unseenResponseDto.getStatus().equals(ResponseStatus.OK) && unseenResponseDto.isHasMore());
             }else{
                 log.warn("UnSeen retrieve service execution is called in short period. Previous call is not finished yet and is holding the lock.");
             }
