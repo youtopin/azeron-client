@@ -50,24 +50,22 @@ public class AzeronSeenPublisher implements SeenPublisher {
 
     @Override
     public void publishSeen(String messageId, String channelName) {
-        boolean acquired = semaphore.tryAcquire();
-        boolean seenSent = false;
-        try {
-            if(acquired){
+        log.debug("Publishing seen for messageId `" + messageId + "`, channelName `"+ channelName);
+        if(semaphore.tryAcquire()){
+            boolean seenSent = false;
+            try {
                 doSeen(messageId, channelName);
                 seenSent = true;
                 clearQueue();
-            } else {
-                queue.add(SeenRequest.builder().channelName(channelName).messageId(messageId).build());
-            }
-        } catch (Exception e) {
-            log.catching(e);
-            if(!seenSent)
-                queue.add(SeenRequest.builder().channelName(channelName).messageId(messageId).build());
-        } finally {
-            if(acquired) {
+            }catch (Exception e){
+                log.catching(e);
+                if(!seenSent)
+                    queue.add(SeenRequest.builder().channelName(channelName).messageId(messageId).build());
+            }finally {
                 semaphore.release();
             }
+        }else {
+            queue.add(SeenRequest.builder().channelName(channelName).messageId(messageId).build());
         }
     }
 
