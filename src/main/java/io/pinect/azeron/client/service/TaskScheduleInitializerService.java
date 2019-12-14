@@ -14,6 +14,7 @@ import io.pinect.azeron.client.service.stateListener.NatsConnectionStateListener
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,7 @@ public class TaskScheduleInitializerService {
     private final Pinger pinger;
 
     @Autowired
-    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, AtomicNatsHolder atomicNatsHolder, TaskScheduler azeronTaskScheduler, NatsConnectionStateListener natsConnectionStateListener, NatsConfigProvider natsConfigProvider, ApplicationContext applicationContext, NatsReconnectForceService natsReconnectForceService, Pinger pinger) {
+    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, @Lazy NatsReconnectForceService natsReconnectForceService, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
