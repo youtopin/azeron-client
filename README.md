@@ -91,7 +91,7 @@ Example with details:
 					try {
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
-						log.error(e);
+						log.catching(e);
 					}
 					log.info("Finished processing text: "+ text);
 				}

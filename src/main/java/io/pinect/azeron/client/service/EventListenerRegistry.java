@@ -83,7 +83,7 @@ public class EventListenerRegistry {
                 subscription.close();
             }
         }catch (Exception e){
-            log.error(e);
+            log.catching(e);
         }
 
         try {

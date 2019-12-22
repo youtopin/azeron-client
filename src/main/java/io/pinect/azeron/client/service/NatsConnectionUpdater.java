@@ -31,7 +31,7 @@ public class NatsConnectionUpdater {
                 nats.close();
             }
         }catch (Exception e){
-            log.error(e);
+            log.catching(e);
         }
 
         NatsConfigModel natsConfig = natsConfigProvider.getNatsConfig();

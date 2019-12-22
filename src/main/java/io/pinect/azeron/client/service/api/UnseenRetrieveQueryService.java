@@ -51,7 +51,7 @@ public class UnseenRetrieveQueryService {
                 log.warn("UnSeen retrieve service execution is called in short period. Previous call is not finished yet and is holding the lock.");
             }
         } catch (Exception e) {
-            log.error(e);
+            log.catching(e);
         }finally {
             if(locked)
                 lock.unlock();

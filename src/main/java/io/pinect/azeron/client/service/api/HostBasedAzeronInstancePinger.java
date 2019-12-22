@@ -26,7 +26,7 @@ public class HostBasedAzeronInstancePinger implements Pinger {
             if(responseEntity.getStatusCode().equals(HttpStatus.OK) && responseEntity.hasBody())
                 return responseEntity.getBody();
         }catch (Exception e){
-            log.error(e);
+            log.catching(e);
         }
         return PongDto.builder().status(ResponseStatus.FAILED).build();
     }
