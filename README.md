@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/sepehr-gh/azeron-client.svg)](https://jitpack.io/#sepehr-gh/azeron-client)
+
 # azeron-client
 Works with [Azeron Server](https://github.com/sepehr-gh/azeron-server), The scalable and reliable messaging library, Wraps nats.io and uses Java Spring framework
 
