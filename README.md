@@ -45,7 +45,7 @@ Check [Jitpack](https://jitpack.io/#sepehr-gh/azeron-client)
 
 	git clone https://github.com/sepehr-gh/azeron-client.git
 
-build with maven
+change directory to `azeron-client` and build project with maven
 
 	mvn clean install
 
@@ -54,7 +54,7 @@ use Azeron in your maven POM dependencies
 	<dependency>
 		<groupId>io.pinect</groupId>
 		<artifactId>azeron-client</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.1.6-SNAPSHOT</version>
 	</dependency>
 
 ## Usage
