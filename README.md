@@ -18,9 +18,30 @@ Azeron client is library to work with Azeron Server and nats.
 
 ## Installation
 
-There is no builds available at maven centrals at the moment. The simplest strategy is to add azeron to your local maven repository.
+### Maven
 
-Clone from source
+Add jitpack repository to your repositories:
+
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
+Add azeron dependency:
+
+	<dependency>
+	    <groupId>com.github.sepehr-gh</groupId>
+	    <artifactId>azeron-client</artifactId>
+	    <version>1.1.6-SNAPSHOT</version>
+	</dependency>
+
+### Gradle, sbt, leiningen
+
+Check [Jitpack](https://jitpack.io/#sepehr-gh/azeron-client)
+
+### Clone from source
 
 	git clone https://github.com/sepehr-gh/azeron-client.git
 
