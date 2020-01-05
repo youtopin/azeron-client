@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "azeron.client",
+      "type": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "azeron.client.azeron-server-host",
+      "type": "java.lang.String",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": "localhost"
+    },
+    {
+      "name": "azeron.client.fallback-publish-interval-seconds",
+      "type": "java.lang.Integer",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "azeron.client.ping-interval-seconds",
+      "type": "java.lang.Integer",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": 10
+    },
+    {
+      "name": "azeron.client.retrieve-unseen",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "azeron.client.seen-publish-semaphore-size",
+      "type": "java.lang.Integer",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": 20
+    },
+    {
+      "name": "azeron.client.un-subscribe-when-shutting-down",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "azeron.client.unseen-query-interval-seconds",
+      "type": "java.lang.Integer",
+      "sourceType": "io.pinect.azeron.client.config.properties.AzeronClientProperties",
+      "defaultValue": 20
+    }
+  ],
+  "hints": []
+}
