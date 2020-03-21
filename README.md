@@ -34,7 +34,7 @@ Add azeron dependency:
 	<dependency>
 	    <groupId>com.github.sepehr-gh</groupId>
 	    <artifactId>azeron-client</artifactId>
-	    <version>1.1.6-SNAPSHOT</version>
+	    <version>1.1.8-SNAPSHOT</version>
 	</dependency>
 
 ### Gradle, sbt, leiningen
@@ -80,6 +80,51 @@ In clustered environment, if any azeron instance is up, then things are working 
 
 ### Add new listener
 
+#### Easy way
+
+The best way to create a listener is to implement `SimpleEventListener` for generic type of your DTO.
+Then you need to mark this class with `@AzeronListener` and define eventName, classType of DTO, and policy.
+
+
+    @Log4j2
+    @AzeronListener(eventName = "event_channel_name", ofClass = YourDto.class, policy = HandlerPolicy.AZERON)
+    public class SeenAsyncStrategyListener implements SimpleEventListener<SimpleAzeronMessage> {
+        private final String serviceName;
+        @Autowired
+        public SeenAsyncStrategyListener(@Value("${spring.application.name}") String serviceName) {
+            this.serviceName = serviceName;
+        }
+    
+        @Override
+        public AzeronMessageProcessor<SimpleAzeronMessage> azeronMessageProcessor() {
+            return new AzeronMessageProcessor<SimpleAzeronMessage>() {
+                @Override
+                public void process(SimpleAzeronMessage simpleAzeronMessage) {
+                    // Your processor logic
+                }
+            };
+        }
+    
+        @Override
+        public AzeronErrorHandler azeronErrorHandler() {
+            return new AzeronErrorHandler() {
+                @Override
+                public void onError(Exception e, MessageDto messageDto) {
+                    error handler logic
+                }
+            };
+        }
+    
+        @Override
+        public String serviceName() {
+            return serviceName;
+        }
+    
+    }
+
+#### OLD WAY
+
+And probably hard way.
 To add new listener you have to implement (extend) `AbstractAzeronMessageHandler<E>` from `io.pinect.azeron.client.service.handler`.
 
 Example with details:
@@ -168,7 +213,7 @@ Different policies are:
 - **SEEN_ASYNC**: Receives message, process it, sends seen in new thread after process is complete
 - **NO_AZERON**: Does not send back any seen or acknowledgement.
 
-##### Using newly created listener
+##### Using newly created listener (DEPRICATED)
 
 Now your have to register your new listener in Azeron message registry.
 
@@ -190,10 +235,32 @@ Now your have to register your new listener in Azeron message registry.
         }
     }
 
+**DEPRICATED NOTE**: Azeron now automatically scans and registers listener when application starts. 
 
 ### Publish Message
 
-In order to create new message publisher service, implement `EventMessagePublisher` from ` io.pinect.azeron.client.service.publisher`. Example:
+#### Easy Way
+
+Define your publisher class.
+
+    @Publisher(
+            publishStrategy = EventMessagePublisher.PublishStrategy.AZERON,
+            eventName = "event_name",
+            forClass = YourDto.class
+    )
+    public class MyMessagePublisher implements EventPublisher<SimpleAzeronMessage> {
+        @Override
+        public void publish(YourDto yourDto, @Nullable MessageHandler messageHandler) {
+    
+        }
+    }
+
+Then import and autowire your publisher to other services and publish your dto by invoking `publish(muDto, null)`.
+
+#### Old Way
+
+And hard way.
+To create new message publisher service, you can also implement `EventMessagePublisher` from ` io.pinect.azeron.client.service.publisher`. Example:
 
 	@Service
 	@Log4j2
