@@ -15,4 +15,5 @@ public class AzeronClientProperties {
     private int unseenQueryIntervalSeconds = 20;
     private int fallbackPublishIntervalSeconds = 20;
     private int seenPublishSemaphoreSize = 20;
+    private int natsRequestTimeoutSeconds = 10;
 }

@@ -7,7 +7,6 @@ import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.exception.PublishException;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
-import io.pinect.azeron.client.service.NatsReconnectForceService;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import nats.client.MessageHandler;
@@ -32,15 +31,17 @@ public class EventMessagePublisher {
     private final RetryTemplate eventPublishRetryTemplate;
     private final FallbackRepository fallbackRepository;
     private final String serviceName;
+    private final int natsRequestTimeoutSeconds;
 
 
-    public EventMessagePublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, String serviceName) {
+    public EventMessagePublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, String serviceName, int natsRequestTimeoutSeconds) {
         this.natsAtomicReference = atomicNatsHolder.getNatsAtomicReference();
         this.objectMapper = objectMapper;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.eventPublishRetryTemplate = eventPublishRetryTemplate;
         this.fallbackRepository = fallbackRepository;
         this.serviceName = serviceName;
+        this.natsRequestTimeoutSeconds = natsRequestTimeoutSeconds;
     }
 
     public void sendMessage(String eventName, String message, PublishStrategy publishStrategy) throws Exception {

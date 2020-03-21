@@ -21,7 +21,7 @@ public class DefaultAzeronServerStatusTracker implements AzeronServerStatusTrack
         log.trace("Azeron status update: "+ s + " , changed: "+ hasChanged);
         this.status = s;
         if(hasChanged && isUp()){
-            eventListenerRegistry.reRegisterAll();
+            eventListenerRegistry.retryableReRegisterAll();
         }
     }
 

@@ -2,6 +2,7 @@ package io.pinect.azeron.client.service.publisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.AtomicNatsHolder;
+import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import lombok.extern.log4j.Log4j2;
@@ -21,8 +22,8 @@ public class FallbackPublisherService extends EventMessagePublisher{
     private final AzeronServerStatusTracker azeronServerStatusTracker;
 
     @Autowired
-    public FallbackPublisherService(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName) {
-        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName);
+    public FallbackPublisherService(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName, AzeronClientProperties azeronClientProperties) {
+        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName, azeronClientProperties.getNatsRequestTimeoutSeconds());
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.fallbackRepository = fallbackRepository;
         lock = new ReentrantLock();

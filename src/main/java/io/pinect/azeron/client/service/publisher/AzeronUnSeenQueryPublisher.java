@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -29,7 +28,7 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
 
     @Autowired
     public AzeronUnSeenQueryPublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName, AzeronClientProperties azeronClientProperties) {
-        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName);
+        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName, azeronClientProperties.getNatsRequestTimeoutSeconds());
         this.serviceName = serviceName;
         this.azeronClientProperties = azeronClientProperties;
     }
@@ -41,10 +40,6 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
         defaultValue.setStatus(ResponseStatus.FAILED);
         AtomicReference<UnseenResponseDto> unseenResponseDto = new AtomicReference<>(defaultValue);
 
-        AtomicBoolean hasUpdated = new AtomicBoolean(false);
-
-        long l = new Date().getTime();
-
         String json = getObjectMapper().writeValueAsString(unseenQueryDto);
         log.debug("Unseen query -> "+ unseenQueryDto +" , "+ json);
 
@@ -52,17 +47,20 @@ public class AzeronUnSeenQueryPublisher extends EventMessagePublisher implements
         sendMessage(ChannelName.AZERON_QUERY_CHANNEL_NAME, json, PublishStrategy.NATS, message -> {
             String messageBody = message.getBody();
             log.debug("Unseen response received, body: "+ messageBody);
-            try {
-                unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));
-            } catch (IOException e) {
-                log.catching(e);
-                throw new RuntimeException(e);
+            synchronized (unseenResponseDto){
+                try {
+                    unseenResponseDto.set(getObjectMapper().readValue(messageBody, UnseenResponseDto.class));
+                } catch (IOException e) {
+                    log.catching(e);
+                    throw new RuntimeException(e);
+                }finally {
+                    unseenResponseDto.notify();
+                }
             }
-            hasUpdated.set(true);
         }, true);
 
-        while (!hasUpdated.get() && (new Date().getTime() - l < 21000)){
-            //wait
+        synchronized (unseenResponseDto){
+            unseenResponseDto.wait(10000);
         }
 
         log.debug("Unseen result -> "+ unseenResponseDto.get() +" , "+ json);

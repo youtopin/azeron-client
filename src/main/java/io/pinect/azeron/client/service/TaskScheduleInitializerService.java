@@ -88,7 +88,7 @@ public class TaskScheduleInitializerService {
             }
         }
         if(b)
-            eventListenerRegistry.reRegisterAll();
+            eventListenerRegistry.retryableReRegisterAll();
     }
 
     private void startUnseenRetrieveSchedule(){

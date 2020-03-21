@@ -37,7 +37,7 @@ public class AzeronNatsConnectionStateListener implements NatsConnectionStateLis
         log.info("Nats state changed from "+ this.state + " to "+ state);
         switch (state){
             case CONNECTED:
-                eventListenerRegistry.reRegisterAll();
+                eventListenerRegistry.retryableReRegisterAll();
                 taskScheduleInitializerService.destroy();
                 taskScheduleInitializerService.initialize();
                 break;

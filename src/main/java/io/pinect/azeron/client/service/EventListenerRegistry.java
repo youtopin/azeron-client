@@ -8,6 +8,9 @@ import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.out.SubscriptionControlDto;
 import io.pinect.azeron.client.domain.dto.out.UnSubscribeControlDto;
 import io.pinect.azeron.client.service.handler.EventListener;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import nats.client.Message;
 import nats.client.MessageHandler;
@@ -15,6 +18,12 @@ import nats.client.Nats;
 import nats.client.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.AlwaysRetryPolicy;
+import org.springframework.retry.policy.TimeoutRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
@@ -24,6 +33,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.pinect.azeron.client.config.ChannelName.AZERON_SUBSCRIBE_API_NAME;
 import static io.pinect.azeron.client.config.ChannelName.AZERON_UNSUBSCRIBE_API_NAME;
@@ -38,6 +49,10 @@ public class EventListenerRegistry {
     private final ObjectMapper objectMapper;
     private final AzeronClientProperties azeronClientProperties;
     private final String serviceName;
+    private final RetryTemplate retryTemplate;
+    private final Lock reRegisterAllLock;
+    private final Lock retryableReRegisterAllLock;
+
 
     @Autowired
     public EventListenerRegistry(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronClientProperties azeronClientProperties, @Value("${spring.application.name}") String serviceName) {
@@ -45,28 +60,62 @@ public class EventListenerRegistry {
         this.objectMapper = objectMapper;
         this.azeronClientProperties = azeronClientProperties;
         this.serviceName = serviceName;
+        retryTemplate = new RetryTemplate();
+        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+        fixedBackOffPolicy.setBackOffPeriod(2000);
+        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+        retryTemplate.setRetryPolicy(new AlwaysRetryPolicy());
+        reRegisterAllLock = new ReentrantLock();
+        retryableReRegisterAllLock = new ReentrantLock();
     }
 
+    @SneakyThrows
     public void register(EventListener eventListener) {
         log.debug("Registering event listener -> event name: "+ eventListener.eventName() + " |  service : " + eventListener.clientConfig().getServiceName());
-        eventListenersMap.put(eventListener.eventName(), eventListener);
+        EventListener oldValue = eventListenersMap.putIfAbsent(eventListener.eventName(), eventListener);
         try {
-            subscribe(eventListener);
+            if(oldValue == null)
+                subscribe(eventListener);
         } catch (JsonProcessingException e) {
             eventListenersMap.remove(eventListener.eventName());
             throw new RuntimeException(e);
         }
     }
 
+    public void retryableReRegisterAll(){
+        boolean tryLock = retryableReRegisterAllLock.tryLock();
+        if(!tryLock)
+            return;
+        try {
+            retryTemplate.execute(new RetryCallback<Void, Throwable>() {
+                @Override
+                public Void doWithRetry(RetryContext retryContext) throws Throwable {
+                    reRegisterAll();
+                    return null;
+                }
+            });
+        } catch (Throwable throwable) {
+            throw new RuntimeException();
+        }finally {
+            retryableReRegisterAllLock.unlock();
+        }
+    }
+
     public void reRegisterAll(){
+        boolean locked = reRegisterAllLock.tryLock();
+        if(!locked)
+            return;
         log.info("Re-registering all channels into Azeron.");
-        for(String channelName: eventListenersMap.keySet()){
-            try {
-                EventListener eventListener = eventListenersMap.get(channelName);
-                subscribe(eventListener);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+        try {
+            for(String channelName: eventListenersMap.keySet()){
+                subscribe(eventListenersMap.get(channelName));
             }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            log.catching(e);
+        } finally {
+            reRegisterAllLock.unlock();
         }
     }
 
@@ -100,7 +149,7 @@ public class EventListenerRegistry {
         return eventListenersMap.get(channelName);
     }
 
-    private void subscribe(EventListener eventListener) throws JsonProcessingException {
+    private void subscribe(EventListener eventListener) throws JsonProcessingException, InterruptedException {
         Subscription subscription = subscriptionMap.get(eventListener.eventName());
         if(eventListener.useAzeron())
             subscribeWithAzeron(eventListener);
@@ -110,27 +159,48 @@ public class EventListenerRegistry {
             subscription.close();
     }
 
-    private void subscribeWithAzeron(EventListener eventListener) throws JsonProcessingException {
+    @SneakyThrows
+    private void subscribeWithAzeron(EventListener eventListener) throws JsonProcessingException, InterruptedException {
         SubscriptionControlDto subscriptionControlDto = getSubscriptionControlDto(eventListener);
         String json = getSubscriptionControlJson(subscriptionControlDto);
         Nats nats = natsAtomicReference.get();
+        AzeronSubscriptionResult azeronSubscriptionResult = new AzeronSubscriptionResult();
         if(nats.isConnected()){
             nats.request(AZERON_SUBSCRIBE_API_NAME, json, 5, TimeUnit.SECONDS, new MessageHandler() {
                 @Override
                 public void onMessage(Message message) {
-                    if(message.getBody().equals("OK")){
+                    synchronized (azeronSubscriptionResult){
                         try {
-                            subscribeToNats(eventListener);
+                            if(message.getBody().equals("OK")) {
+                                subscribeToNats(eventListener);
+                                azeronSubscriptionResult.setCompleted(true);
+                            }else{
+                                azeronSubscriptionResult.setException(new RuntimeException("Azeron subsription was not OK"));
+                            }
                         } catch (Exception e) {
                             log.error("Could not subscribe to nats", e);
-                            throw new RuntimeException(e);
+                            azeronSubscriptionResult.setException(e);
+                        }finally {
+                            azeronSubscriptionResult.notify();
                         }
-                    }else{
-                        throw new RuntimeException("Azeron <server> failed to subscribe to "+eventListener.eventName());
                     }
+
                 }
             });
         }
+
+        synchronized (azeronSubscriptionResult){
+            azeronSubscriptionResult.wait(6000);
+            if(!azeronSubscriptionResult.isCompleted())
+                throw azeronSubscriptionResult.getException();
+        }
+    }
+
+    @Setter
+    @Getter
+    private class AzeronSubscriptionResult {
+        private Exception exception;
+        private boolean completed = false;
     }
 
     private void subscribeToNats(EventListener eventListener) {
