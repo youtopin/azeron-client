@@ -6,12 +6,9 @@ import io.pinect.azeron.client.domain.model.ClientConfig;
 import nats.client.MessageHandler;
 import org.springframework.lang.Nullable;
 
-public interface EventListener<E> extends MessageHandler {
+public interface EventListener<E> extends SimpleEventListener {
     HandlerPolicy policy();
     Class<E> eClass();
-    AzeronMessageProcessor<E> azeronMessageProcessor();
-    AzeronErrorHandler azeronErrorHandler();
-    String eventName();
     ClientConfig clientConfig();
 
     default boolean useAzeron(){
@@ -21,12 +18,4 @@ public interface EventListener<E> extends MessageHandler {
     void handle(String messageBody);
 
     void handle(MessageDto messageDto);
-
-    interface AzeronErrorHandler {
-        void onError(Exception e, @Nullable MessageDto messageDto);
-    }
-
-    interface AzeronMessageProcessor<E> {
-        void process(E e);
-    }
 }
