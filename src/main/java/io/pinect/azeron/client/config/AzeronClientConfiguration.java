@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.*;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -32,6 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @ComponentScan("io.pinect.azeron.client")
 @EnableConfigurationProperties({AzeronClientProperties.class})
 @Log4j2
+@EnableAspectJAutoProxy
 public class AzeronClientConfiguration {
     private final AzeronClientProperties azeronClientProperties;
 

@@ -1,11 +1,14 @@
 package io.pinect.azeron.client.service.publisher;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.*;
 
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
+@Component
 public @interface Publisher {
     Class forClass();
     boolean raw() default false;

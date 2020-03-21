@@ -7,38 +7,45 @@ import io.pinect.azeron.client.service.handler.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Component
 @Log4j2
-public class ApplicationStartupListener implements ApplicationListener<ApplicationReadyEvent> {
+public class AzeronApplicationStartupListener implements ApplicationListener<ApplicationStartedEvent> {
     private final EventListenerRegistry eventListenerRegistry;
     private final AzeronMessageHandlerDependencyHolder azeronMessageHandlerDependencyHolder;
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public ApplicationStartupListener(EventListenerRegistry eventListenerRegistry, AzeronMessageHandlerDependencyHolder azeronMessageHandlerDependencyHolder, ApplicationContext applicationContext) {
+    public AzeronApplicationStartupListener(EventListenerRegistry eventListenerRegistry, AzeronMessageHandlerDependencyHolder azeronMessageHandlerDependencyHolder, ApplicationContext applicationContext) {
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronMessageHandlerDependencyHolder = azeronMessageHandlerDependencyHolder;
         this.applicationContext = applicationContext;
     }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+    public void onApplicationEvent(ApplicationStartedEvent applicationStartedEvent) {
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(AzeronListener.class);
         beansWithAnnotation.keySet().forEach(beanName -> {
             Object bean = beansWithAnnotation.get(beanName);
-            AzeronListener azeronListener = applicationContext.findAnnotationOnBean(beanName, AzeronListener.class);
-            if(bean instanceof SimpleEventListener){
+            if(bean instanceof EventListener){
+
+            } else if(bean instanceof SimpleEventListener){
+                AzeronListener azeronListener = applicationContext.findAnnotationOnBean(beanName, AzeronListener.class);
                 eventListenerRegistry.register(getEventListener((SimpleEventListener) bean, azeronListener));
-            }else{
+            } else {
                 throw new RuntimeException("");
             }
         });
+
+        Collection<EventListener> eventListeners = applicationContext.getBeansOfType(EventListener.class).values();
+        eventListeners.forEach(eventListenerRegistry::register);
     }
 
     private EventListener<?> getEventListener(SimpleEventListener<?> simpleEventListener, AzeronListener azeronListener){

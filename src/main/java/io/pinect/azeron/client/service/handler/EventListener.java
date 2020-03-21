@@ -10,6 +10,7 @@ public interface EventListener<E> extends SimpleEventListener {
     HandlerPolicy policy();
     Class<E> eClass();
     ClientConfig clientConfig();
+    String eventName();
 
     default boolean useAzeron(){
         return !policy().equals(HandlerPolicy.NO_AZERON);

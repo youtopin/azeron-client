@@ -5,15 +5,14 @@ import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.service.AzeronServerStatusTracker;
-import jdk.internal.jline.internal.Nullable;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import nats.client.MessageHandler;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -30,14 +29,17 @@ public class PublisherAspect {
         this.objectMapper = objectMapper;
     }
 
-    @After(value = "execution(public void io.pinect.azeron.client.service.publisher.EventPublisher.publish()) && args(param, messageHandler) && @annotation(publisher)", argNames = "param,messageHandler,publisher,thisJoinPoint")
-    public void publishByMethod(final Object param, @Nullable final MessageHandler messageHandler, final Publisher publisher, JoinPoint thisJoinPoint) {
-        doPublish(param, messageHandler, publisher);
-    }
+    /*@Pointcut(value = "execution(* publish(..)) && args(object, messageHandler) && (@annotation(publisher) || @within(publisher))", argNames = "object,messageHandler,publisher")
+    public void publishPointcut(final Object object, @Nullable final MessageHandler messageHandler, final Publisher publisher){}
 
-    @After(value = "execution(public void io.pinect.azeron.client.service.publisher.EventPublisher.publish()) && args(param, messageHandler) && @within(publisher)", argNames = "param,messageHandler,publisher,thisJoinPoint")
-    public void publishByClass(final Object param, @Nullable final MessageHandler messageHandler, final Publisher publisher, JoinPoint thisJoinPoint) {
-        doPublish(param, messageHandler, publisher);
+    @After(value = "publishPointcut(object, messageHandler, publisher)", argNames = "object, messageHandler, publisher")
+    public void publishByMethod(final Object object, @Nullable final MessageHandler messageHandler, final Publisher publisher) {
+        doPublish(object, messageHandler, publisher);
+    }*/
+
+    @After(value = "execution(* io.pinect.azeron.client.service.publisher.EventPublisher.publish(..)) && args(object, messageHandler) && @within(publisher)", argNames = "object,messageHandler,publisher")
+    public void publishByClass(final Object object, @Nullable final MessageHandler messageHandler, final Publisher publisher) {
+        doPublish(object, messageHandler, publisher);
     }
 
     @SneakyThrows
