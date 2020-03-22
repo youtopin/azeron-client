@@ -194,7 +194,7 @@ Example with details:
 
 ##### Details
 
-The generic `<E>` is type of the message dto class. Azeron will convery incoming message to this generic type automatically.
+The generic `<E>` is type of the message dto class. Azeron will convert incoming message to this generic type automatically.
 
 `AzeronMessageProcessor<E> azeronMessageProcessor()`: This is where you process the message.
 
