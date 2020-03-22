@@ -34,7 +34,7 @@ Add azeron dependency:
 	<dependency>
 	    <groupId>com.github.sepehr-gh</groupId>
 	    <artifactId>azeron-client</artifactId>
-	    <version>1.1.8-SNAPSHOT</version>
+	    <version>1.1.9-SNAPSHOT</version>
 	</dependency>
 
 ### Gradle, sbt, leiningen
