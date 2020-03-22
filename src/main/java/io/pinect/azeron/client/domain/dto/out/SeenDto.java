@@ -6,7 +6,6 @@ import lombok.*;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

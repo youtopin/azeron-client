@@ -14,11 +14,6 @@ import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 @Log4j2
 public class HostBasedNatsConfigProvider implements NatsConfigProvider {
     private final RestTemplate restTemplate;

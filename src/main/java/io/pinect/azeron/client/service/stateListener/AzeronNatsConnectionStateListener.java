@@ -1,9 +1,9 @@
 package io.pinect.azeron.client.service.stateListener;
 
 import io.pinect.azeron.client.AtomicNatsHolder;
-import io.pinect.azeron.client.service.TaskScheduleInitializerService;
 import io.pinect.azeron.client.service.EventListenerRegistry;
 import io.pinect.azeron.client.service.NatsConnectionUpdater;
+import io.pinect.azeron.client.service.TaskScheduleInitializerService;
 import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import lombok.extern.log4j.Log4j2;
 import nats.client.ConnectionStateListener;

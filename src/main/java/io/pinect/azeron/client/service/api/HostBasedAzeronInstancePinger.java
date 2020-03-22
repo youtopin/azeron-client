@@ -3,7 +3,6 @@ package io.pinect.azeron.client.service.api;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.dto.in.PongDto;
-import io.pinect.azeron.client.service.AzeronServerStatusTracker;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

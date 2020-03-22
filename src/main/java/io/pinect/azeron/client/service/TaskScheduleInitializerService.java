@@ -10,7 +10,6 @@ import io.pinect.azeron.client.service.listener.EventListener;
 import io.pinect.azeron.client.service.publisher.FallbackPublisherService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Component;
