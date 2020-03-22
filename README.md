@@ -125,7 +125,7 @@ Then you need to mark this class with `@AzeronListener` and define eventName, cl
 #### OLD WAY
 
 And probably hard way.
-To add new listener you have to implement (extend) `AbstractAzeronMessageHandler<E>` from `io.pinect.azeron.client.service.handler`.
+To add new listener you have to implement (extend) `AbstractAzeronMessageHandler<E>` from `io.pinect.azeron.client.service.listener`.
 
 Example with details:
 

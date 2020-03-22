@@ -1,4 +1,4 @@
-package io.pinect.azeron.client.service.handler;
+package io.pinect.azeron.client.service.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.service.publisher.SeenPublisher;

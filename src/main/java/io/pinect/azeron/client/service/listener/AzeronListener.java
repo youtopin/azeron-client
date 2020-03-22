@@ -1,4 +1,4 @@
-package io.pinect.azeron.client.service.handler;
+package io.pinect.azeron.client.service.listener;
 
 import io.pinect.azeron.client.domain.HandlerPolicy;
 import org.springframework.stereotype.Component;

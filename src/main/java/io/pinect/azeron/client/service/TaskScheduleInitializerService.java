@@ -1,19 +1,15 @@
 package io.pinect.azeron.client.service;
 
-import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.dto.ResponseStatus;
 import io.pinect.azeron.client.domain.dto.in.PongDto;
-import io.pinect.azeron.client.service.api.NatsConfigProvider;
 import io.pinect.azeron.client.service.api.Pinger;
 import io.pinect.azeron.client.service.api.UnseenRetrieveQueryService;
-import io.pinect.azeron.client.service.handler.EventListener;
+import io.pinect.azeron.client.service.listener.EventListener;
 import io.pinect.azeron.client.service.publisher.FallbackPublisherService;
-import io.pinect.azeron.client.service.stateListener.NatsConnectionStateListener;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
@@ -21,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -33,22 +28,19 @@ public class TaskScheduleInitializerService {
     private final UnseenRetrieveQueryService unseenRetrieveQueryService;
     private final FallbackPublisherService fallbackPublisherService;
     private final TaskScheduler azeronTaskScheduler;
-    private final NatsReconnectForceService natsReconnectForceService;
     private ScheduledFuture<?> pingSchedule;
     private ScheduledFuture<?> unseenSchedule;
     private ScheduledFuture<?> fallbackPublishSchedule;
-    private ScheduledFuture<?> natsConnectionCheckSchedule;
     private final Pinger pinger;
 
     @Autowired
-    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, @Lazy NatsReconnectForceService natsReconnectForceService, Pinger pinger) {
+    public TaskScheduleInitializerService(AzeronClientProperties azeronClientProperties, EventListenerRegistry eventListenerRegistry, AzeronServerStatusTracker azeronServerStatusTracker, UnseenRetrieveQueryService unseenRetrieveQueryService, FallbackPublisherService fallbackPublisherService, TaskScheduler azeronTaskScheduler, Pinger pinger) {
         this.azeronClientProperties = azeronClientProperties;
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.unseenRetrieveQueryService = unseenRetrieveQueryService;
         this.fallbackPublisherService = fallbackPublisherService;
         this.azeronTaskScheduler = azeronTaskScheduler;
-        this.natsReconnectForceService = natsReconnectForceService;
         this.pinger = pinger;
     }
 
@@ -117,18 +109,6 @@ public class TaskScheduleInitializerService {
         }, periodicTrigger);
     }
 
-    private void startConnectionCheckSchedule(){
-        log.info("starting connection check schedule");
-        PeriodicTrigger periodicTrigger = new PeriodicTrigger(10, TimeUnit.SECONDS);
-        periodicTrigger.setInitialDelay(10000);
-        this.natsConnectionCheckSchedule = azeronTaskScheduler.schedule(new Runnable() {
-            @Override
-            public void run() {
-                natsReconnectForceService.forceNatsReconnect();
-            }
-        }, periodicTrigger);
-    }
-
     @PreDestroy
     public void destroy(){
         if(pingSchedule != null)
@@ -137,7 +117,5 @@ public class TaskScheduleInitializerService {
             unseenSchedule.cancel(true);
         if(fallbackPublishSchedule != null)
             fallbackPublishSchedule.cancel(true);
-        if(natsConnectionCheckSchedule != null)
-            natsConnectionCheckSchedule.cancel(true);
     }
 }
