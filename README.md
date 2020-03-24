@@ -11,8 +11,8 @@ Azeron client is library to work with Azeron Server and nats.
 
 - Ability to choose between using nats directly or Azeron for message publishing
 - Ability to choose between different types of event listening strategies
-- Provides fallback repository to resend messages after failure (when azeron is down)
-- Recovers un-ack messages from server
+- Provides fallback repository to resend messages after failure (when azeron or nats is down)
+- Recovers messages from server
 - Lets you choose your own discovery strategy in clustered environment
 
 
@@ -34,7 +34,7 @@ Add azeron dependency:
 	<dependency>
 	    <groupId>com.github.sepehr-gh</groupId>
 	    <artifactId>azeron-client</artifactId>
-	    <version>1.1.8-SNAPSHOT</version>
+	    <version>1.1.9-SNAPSHOT</version>
 	</dependency>
 
 ### Gradle, sbt, leiningen
@@ -206,7 +206,7 @@ The generic `<E>` is type of the message dto class. Azeron will convert incoming
 
 `HandlerPolicy policy()`: Policy for message handling.
 
-Different policies are:
+### Listener policies
 
 - **FULL**: Receives message, process it, sends seen after process is complete
 - **SEEN_FIRST**: Sends back seen (in new thread, it might fail), no matter if process is completed without errors
@@ -283,7 +283,7 @@ To create new message publisher service, you can also implement `EventMessagePub
 	}
 
 
-Different types of Publish Strategy:
+### Publish Strategies
 
 - **AZERON**: Sends message using Azeron, contains fallback repository to resend if failed
 - **BLOCKED**: Sends message using Azeron, retries till message is successfully sent.
