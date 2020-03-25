@@ -16,4 +16,7 @@ public class AzeronClientProperties {
     private int fallbackPublishIntervalSeconds = 20;
     private int seenPublishSemaphoreSize = 20;
     private int natsRequestTimeoutSeconds = 10;
+    private int asyncThreadPoolCorePoolSize = 10;
+    private int asyncThreadPoolMaxPoolSize = 10;
+    private int asyncThreadPoolQueueCapacity = 10;
 }
