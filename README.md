@@ -54,7 +54,7 @@ use Azeron in your maven POM dependencies
 	<dependency>
 		<groupId>io.pinect</groupId>
 		<artifactId>azeron-client</artifactId>
-		<version>1.1.6-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 	</dependency>
 
 ## Usage
