@@ -1,5 +1,6 @@
 package io.pinect.azeron.client.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
@@ -58,7 +59,9 @@ public class AzeronClientConfiguration {
     @Bean("objectMapper")
     @ConditionalOnMissingBean(value = ObjectMapper.class)
     public ObjectMapper objectMapper(){
-        return new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
     }
 
     @Bean("seenExecutor")
