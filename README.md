@@ -61,7 +61,7 @@ use Azeron in your maven POM dependencies
 
 Annotate your Spring Boot Application with `@EnableAzeronClient`
 
-	@EnableAzeronServer
+	@EnableAzeronClient
 	@Configuration
 	public class AzeronConfiguration {
 	}
