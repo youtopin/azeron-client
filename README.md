@@ -80,13 +80,13 @@ In clustered environment, if any azeron instance is up, then things are working 
 
 ### Add new listener
 
-The best way to create a listener is to implement `SimpleEventListener` for generic type of your DTO.
+The best way to create a listener is to implement `AzeronEventListener` for generic type of your DTO.
 Then you need to mark this class with `@AzeronListener` and define eventName, classType of DTO, and policy.
 
 
     @Log4j2
     @AzeronListener(eventName = "event_channel_name", ofClass = YourDto.class, policy = HandlerPolicy.AZERON)
-    public class SeenAsyncStrategyListener implements SimpleEventListener<SimpleAzeronMessage> {
+    public class SeenAsyncStrategyListener implements AzeronEventListener<SimpleAzeronMessage> {
         private final String serviceName;
         @Autowired
         public SeenAsyncStrategyListener(@Value("${spring.application.name}") String serviceName) {
@@ -143,6 +143,26 @@ The generic `<E>` is type of the message dto class. Azeron will convert incoming
 - **SEEN_ASYNC**: Receives message, process it, sends seen in new thread after process is complete
 - **NO_AZERON**: Does not send back any seen or acknowledgement.
 
+### Dynamically add a listener
+
+For cases where your channel address is changing dynamically or you want to create temporary listeners, you can use `DynamicListenerCreator`.
+
+First you have to inject this class. Then a listener can be created like this:
+
+```
+DynamicListener<?> dynamicListener = dynamicListenerCreator.getBuilderForClass(MyDto.class)
+        .setChannelName("MyChannelName")
+        .setProcessor(myprocessor)
+        .setErrorHandler(errorHandler)
+        .setPolicy(policy)
+        .build();
+```
+
+Dont forget to close your listener after you are done with it:
+
+```
+dynamicListener.close();
+```
 
 ### Publish Message
 

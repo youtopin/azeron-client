@@ -4,7 +4,7 @@ import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.model.ClientConfig;
 
-public interface EventListener<E> extends SimpleEventListener {
+public interface EventListener<E> extends AzeronEventListener {
     HandlerPolicy policy();
     Class<E> eClass();
     ClientConfig clientConfig();
