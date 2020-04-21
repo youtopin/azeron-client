@@ -11,11 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class DynamicListenerCreator {
     private final EventListenerRegistry eventListenerRegistry;
     private final AzeronMessageHandlerDependencyHolder azeronMessageHandlerDependencyHolder;
-
+    private final List<DynamicListener> dynamicListeners;
     private final String serviceName;
 
     @Autowired
@@ -23,10 +27,16 @@ public class DynamicListenerCreator {
         this.eventListenerRegistry = eventListenerRegistry;
         this.azeronMessageHandlerDependencyHolder = azeronMessageHandlerDependencyHolder;
         this.serviceName = serviceName;
+        dynamicListeners = new ArrayList<>();
     }
 
     public DynamicListenerBuilder getBuilderForClass(Class<?> aClass){
         return new DynamicListenerBuilder(aClass);
+    }
+
+    @PreDestroy
+    public void clean(){
+        dynamicListeners.forEach(DynamicListener::close);
     }
 
     public class DynamicListenerBuilder {
@@ -61,7 +71,7 @@ public class DynamicListenerCreator {
         }
 
         public DynamicListener<?> build(){
-            return new DynamicListener<>(new AbstractAzeronMessageHandler<Object>(azeronMessageHandlerDependencyHolder) {
+            DynamicListener<?> dynamicListener = new DynamicListener<>(new AbstractAzeronMessageHandler<Object>(azeronMessageHandlerDependencyHolder) {
                 @Override
                 public AzeronMessageProcessor azeronMessageProcessor() {
                     return processor;
@@ -102,6 +112,9 @@ public class DynamicListenerCreator {
                     return channelName;
                 }
             });
+            dynamicListeners.add(dynamicListener);
+
+            return dynamicListener;
         }
     }
 
