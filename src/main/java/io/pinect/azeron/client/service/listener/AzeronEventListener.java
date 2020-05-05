@@ -5,7 +5,7 @@ import nats.client.Message;
 import nats.client.MessageHandler;
 import org.springframework.lang.Nullable;
 
-public interface SimpleEventListener<E> extends MessageHandler {
+public interface AzeronEventListener<E> extends MessageHandler {
     AzeronMessageProcessor<E> azeronMessageProcessor();
     AzeronErrorHandler azeronErrorHandler();
     String serviceName();

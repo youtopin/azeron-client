@@ -34,7 +34,7 @@ Add azeron dependency:
 	<dependency>
 	    <groupId>com.github.sepehr-gh</groupId>
 	    <artifactId>azeron-client</artifactId>
-	    <version>1.1.9-SNAPSHOT</version>
+	    <version>1.2.1-SNAPSHOT</version>
 	</dependency>
 
 ### Gradle, sbt, leiningen
@@ -54,14 +54,14 @@ use Azeron in your maven POM dependencies
 	<dependency>
 		<groupId>io.pinect</groupId>
 		<artifactId>azeron-client</artifactId>
-		<version>1.1.6-SNAPSHOT</version>
+		<version>1.2.1-SNAPSHOT</version>
 	</dependency>
 
 ## Usage
 
 Annotate your Spring Boot Application with `@EnableAzeronClient`
 
-	@EnableAzeronServer
+	@EnableAzeronClient
 	@Configuration
 	public class AzeronConfiguration {
 	}
@@ -80,15 +80,13 @@ In clustered environment, if any azeron instance is up, then things are working 
 
 ### Add new listener
 
-#### Easy way
-
-The best way to create a listener is to implement `SimpleEventListener` for generic type of your DTO.
+The best way to create a listener is to implement `AzeronEventListener` for generic type of your DTO.
 Then you need to mark this class with `@AzeronListener` and define eventName, classType of DTO, and policy.
 
 
     @Log4j2
     @AzeronListener(eventName = "event_channel_name", ofClass = YourDto.class, policy = HandlerPolicy.AZERON)
-    public class SeenAsyncStrategyListener implements SimpleEventListener<SimpleAzeronMessage> {
+    public class SeenAsyncStrategyListener implements AzeronEventListener<SimpleAzeronMessage> {
         private final String serviceName;
         @Autowired
         public SeenAsyncStrategyListener(@Value("${spring.application.name}") String serviceName) {
@@ -122,75 +120,7 @@ Then you need to mark this class with `@AzeronListener` and define eventName, cl
     
     }
 
-#### OLD WAY
-
-And probably hard way.
-To add new listener you have to implement (extend) `AbstractAzeronMessageHandler<E>` from `io.pinect.azeron.client.service.listener`.
-
-Example with details:
-
-	@Component
-	@Log4j2
-	public class FullStrategyListener extends AbstractAzeronMessageHandler<SimpleAzeronMessage> {
-		private final String serviceName;
-		@Autowired
-		public FullStrategyListener(AzeronMessageHandlerDependencyHolder azeronMessageHandlerDependencyHolder, @Value("${spring.application.name}") String serviceName) {
-			super(azeronMessageHandlerDependencyHolder);
-			this.serviceName = serviceName;
-		}
-
-		@Override
-		public HandlerPolicy policy() {
-			return HandlerPolicy.FULL;
-		}
-
-		@Override
-		public Class<SimpleAzeronMessage> eClass() {
-			return SimpleAzeronMessage.class;
-		}
-
-		@Override
-		public AzeronMessageProcessor<SimpleAzeronMessage> azeronMessageProcessor() {
-			return new AzeronMessageProcessor<SimpleAzeronMessage>() {
-				@Override
-				public void process(SimpleAzeronMessage simpleAzeronMessage) {
-					String text = simpleAzeronMessage.getText();
-					log.info("Processing text: "+ text);
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						log.catching(e);
-					}
-					log.info("Finished processing text: "+ text);
-				}
-			};
-		}
-
-		@Override
-		public AzeronErrorHandler azeronErrorHandler() {
-			return new AzeronErrorHandler() {
-				@Override
-				public void onError(Exception e, MessageDto messageDto) {
-					log.error("Error while handling message -> "+ messageDto, e);
-				}
-			};
-		}
-
-		@Override
-		public String eventName() {
-			return "full_event_name";
-		}
-
-		@Override
-		public ClientConfig clientConfig() {
-			ClientConfig clientConfig = new ClientConfig();
-			clientConfig.setServiceName(serviceName);
-			clientConfig.setUseQueueGroup(true);
-			clientConfig.setVersion(1);
-			return clientConfig;
-		}
-	}
-
+Azeron will register these beans when application is starting up.
 
 ##### Details
 
@@ -213,75 +143,49 @@ The generic `<E>` is type of the message dto class. Azeron will convert incoming
 - **SEEN_ASYNC**: Receives message, process it, sends seen in new thread after process is complete
 - **NO_AZERON**: Does not send back any seen or acknowledgement.
 
-##### Using newly created listener (DEPRICATED)
+### Dynamically add a listener
 
-Now your have to register your new listener in Azeron message registry.
+For cases where your channel address is changing dynamically or you want to create temporary listeners, you can use `DynamicListenerCreator`.
 
-    @Configuration
-    public class AzeronConfiguration {
-        private final FullStrategyListener fullStrategyListener;
-        private final EventListenerRegistry eventListenerRegistry; //Azeron message registry
-    
-        @Autowired
-        public AzeronConfiguration(FullStrategyListener fullStrategyListenerEventListenerRegistry eventListenerRegistry) {
-            this.fullStrategyListener = fullStrategyListener;
-            this.eventListenerRegistry = eventListenerRegistry;
-        }
-    
-        //registering
-        @PostConstruct
-        public void registerServices(){
-            eventListenerRegistry.register(fullStrategyListener);
-        }
-    }
+First you have to inject this class. Then a listener can be created like this:
 
-**DEPRICATED NOTE**: Azeron now automatically scans and registers listener when application starts. 
+```
+DynamicListener<?> dynamicListener = dynamicListenerCreator.getBuilderForClass(MyDto.class)
+        .setChannelName("MyChannelName")
+        .setProcessor(myprocessor)
+        .setErrorHandler(errorHandler)
+        .setPolicy(policy)
+        .build();
+```
+
+Dont forget to close your listener after you are done with it:
+
+```
+dynamicListener.close();
+```
 
 ### Publish Message
 
-#### Easy Way
+All you need is to create an interface and mark it with `@Publisher`. Azeron automcatially wraps this interface with proxy
+and handles message publishing when publish method(s) are invoked. First parameter of publish method should be the DTO to publish.
+If you are using nats replies, you can add message handler as second argument.
 
-Define your publisher class.
+Also, you can use `@Async` to move publish call to new thread. TaskExecutor configurations will be discussed later.
 
     @Publisher(
             publishStrategy = EventMessagePublisher.PublishStrategy.AZERON,
             eventName = "event_name",
             forClass = YourDto.class
     )
-    public class MyMessagePublisher implements EventPublisher<SimpleAzeronMessage> {
-        @Override
+    public interface MyMessagePublisher {
+        public void publish(YourDto yourDto){}
+        
         public void publish(YourDto yourDto, @Nullable MessageHandler messageHandler) {
     
         }
     }
 
 Then import and autowire your publisher to other services and publish your dto by invoking `publish(muDto, null)`.
-
-#### Old Way
-
-And hard way.
-To create new message publisher service, you can also implement `EventMessagePublisher` from ` io.pinect.azeron.client.service.publisher`. Example:
-
-	@Service
-	@Log4j2
-	public class SimpleMessagePublisher extends EventMessagePublisher {
-		@Autowired
-		public SimpleMessagePublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName) {
-			super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName);
-		}
-
-		@Async
-		public void publishSimpleTextMessage(String text, String channelName){
-			try {
-				String value = getObjectMapper().writeValueAsString(new SimpleAzeronMessage(text));
-				log.trace("Publishing message "+ value + " to channel `"+channelName+"`");
-				sendMessage(channelName, value, PublishStrategy.AZERON);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 
 ### Publish Strategies
 
@@ -299,3 +203,9 @@ To create new message publisher service, you can also implement `EventMessagePub
 	azeron.client.fallback-publish-interval-seconds=20 #Fallback repository republish interval
 	azeron.client.un-subscribe-when-shutting-down=false
 	azeron.client.unseen-query-interval-seconds=20
+	
+	# These async configurations are for publisher task executors.
+	
+    azeron.client.asyncThreadPoolCorePoolSize=10
+    azeron.client.asyncThreadPoolMaxPoolSize=10
+    azeron.client.asyncThreadPoolQueueCapacity=10

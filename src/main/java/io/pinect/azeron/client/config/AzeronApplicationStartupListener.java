@@ -35,9 +35,9 @@ public class AzeronApplicationStartupListener implements ApplicationListener<App
             Object bean = beansWithAnnotation.get(beanName);
             if(bean instanceof EventListener){
 
-            } else if(bean instanceof SimpleEventListener){
+            } else if(bean instanceof AzeronEventListener){
                 AzeronListener azeronListener = applicationContext.findAnnotationOnBean(beanName, AzeronListener.class);
-                eventListenerRegistry.register(getEventListener((SimpleEventListener) bean, azeronListener));
+                eventListenerRegistry.register(getEventListener((AzeronEventListener) bean, azeronListener));
             } else {
                 throw new RuntimeException("");
             }
@@ -47,7 +47,7 @@ public class AzeronApplicationStartupListener implements ApplicationListener<App
         eventListeners.forEach(eventListenerRegistry::register);
     }
 
-    private EventListener<?> getEventListener(SimpleEventListener<?> simpleEventListener, AzeronListener azeronListener){
+    private EventListener<?> getEventListener(AzeronEventListener<?> azeronEventListener, AzeronListener azeronListener){
         return new AbstractAzeronMessageHandler(azeronMessageHandlerDependencyHolder){
 
             @Override
@@ -62,17 +62,17 @@ public class AzeronApplicationStartupListener implements ApplicationListener<App
 
             @Override
             public AzeronMessageProcessor azeronMessageProcessor() {
-                return simpleEventListener.azeronMessageProcessor();
+                return azeronEventListener.azeronMessageProcessor();
             }
 
             @Override
             public AzeronErrorHandler azeronErrorHandler() {
-                return simpleEventListener.azeronErrorHandler();
+                return azeronEventListener.azeronErrorHandler();
             }
 
             @Override
             public String serviceName() {
-                return simpleEventListener.serviceName();
+                return azeronEventListener.serviceName();
             }
 
             @Override
@@ -82,7 +82,7 @@ public class AzeronApplicationStartupListener implements ApplicationListener<App
 
             @Override
             public ClientConfig clientConfig() {
-                return new ClientConfig(1, simpleEventListener.serviceName(), azeronListener.useQueueGroup());
+                return new ClientConfig(1, azeronEventListener.serviceName(), azeronListener.useQueueGroup());
             }
         };
     }

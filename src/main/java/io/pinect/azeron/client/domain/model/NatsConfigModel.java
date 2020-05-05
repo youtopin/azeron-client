@@ -1,5 +1,6 @@
 package io.pinect.azeron.client.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NatsConfigModel {
     @Builder.Default
     private List<String> hosts = Arrays.asList("nats://localhost:4222");

@@ -23,7 +23,7 @@ public class FallbackPublisherService extends EventMessagePublisher{
 
     @Autowired
     public FallbackPublisherService(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName, AzeronClientProperties azeronClientProperties) {
-        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName, azeronClientProperties.getNatsRequestTimeoutSeconds());
+        super(atomicNatsHolder, objectMapper, azeronServerStatusTracker, fallbackRepository, eventPublishRetryTemplate, serviceName, azeronClientProperties);
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.fallbackRepository = fallbackRepository;
         lock = new ReentrantLock();

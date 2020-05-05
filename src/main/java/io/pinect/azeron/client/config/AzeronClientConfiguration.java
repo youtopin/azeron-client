@@ -1,5 +1,7 @@
 package io.pinect.azeron.client.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.service.api.HostBasedAzeronInstancePinger;
@@ -11,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.AlwaysRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -29,7 +35,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @ComponentScan("io.pinect.azeron.client")
 @EnableConfigurationProperties({AzeronClientProperties.class})
 @Log4j2
-@EnableAspectJAutoProxy
 public class AzeronClientConfiguration {
     private final AzeronClientProperties azeronClientProperties;
 
@@ -37,7 +42,28 @@ public class AzeronClientConfiguration {
     public AzeronClientConfiguration(AzeronClientProperties azeronClientProperties) {
         this.azeronClientProperties = azeronClientProperties;
     }
-    
+
+    @Bean(name="publisherThreadExecutor")
+    public TaskExecutor publisherThreadExecutor(){
+        ThreadPoolTaskExecutor exec = new ThreadPoolTaskExecutor();
+        exec.setCorePoolSize(azeronClientProperties.getAsyncThreadPoolCorePoolSize());
+        exec.setMaxPoolSize(azeronClientProperties.getAsyncThreadPoolMaxPoolSize());
+        exec.setQueueCapacity(azeronClientProperties.getAsyncThreadPoolQueueCapacity());
+        exec.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        exec.setThreadPriority(Thread.MAX_PRIORITY);
+        exec.setThreadNamePrefix("publisher-thread");
+        exec.initialize();
+        return exec;
+    }
+
+    @Bean("objectMapper")
+    @ConditionalOnMissingBean(value = ObjectMapper.class)
+    public ObjectMapper objectMapper(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
+    }
+
     @Bean("seenExecutor")
     public Executor seenExecutor(){
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();

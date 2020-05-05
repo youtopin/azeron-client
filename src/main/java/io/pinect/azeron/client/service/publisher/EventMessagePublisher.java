@@ -3,6 +3,7 @@ package io.pinect.azeron.client.service.publisher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pinect.azeron.client.AtomicNatsHolder;
+import io.pinect.azeron.client.config.properties.AzeronClientProperties;
 import io.pinect.azeron.client.domain.dto.out.MessageDto;
 import io.pinect.azeron.client.domain.repository.FallbackRepository;
 import io.pinect.azeron.client.exception.PublishException;
@@ -11,10 +12,13 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import nats.client.MessageHandler;
 import nats.client.Nats;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
@@ -24,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Log4j2
+@Component
 public class EventMessagePublisher {
     private final AtomicReference<Nats> natsAtomicReference;
     private final ObjectMapper objectMapper;
@@ -33,15 +38,15 @@ public class EventMessagePublisher {
     private final String serviceName;
     private final int natsRequestTimeoutSeconds;
 
-
-    public EventMessagePublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, String serviceName, int natsRequestTimeoutSeconds) {
+    @Autowired
+    public EventMessagePublisher(AtomicNatsHolder atomicNatsHolder, ObjectMapper objectMapper, AzeronServerStatusTracker azeronServerStatusTracker, FallbackRepository fallbackRepository, RetryTemplate eventPublishRetryTemplate, @Value("${spring.application.name}") String serviceName, AzeronClientProperties azeronClientProperties) {
         this.natsAtomicReference = atomicNatsHolder.getNatsAtomicReference();
         this.objectMapper = objectMapper;
         this.azeronServerStatusTracker = azeronServerStatusTracker;
         this.eventPublishRetryTemplate = eventPublishRetryTemplate;
         this.fallbackRepository = fallbackRepository;
         this.serviceName = serviceName;
-        this.natsRequestTimeoutSeconds = natsRequestTimeoutSeconds;
+        this.natsRequestTimeoutSeconds = azeronClientProperties.getNatsRequestTimeoutSeconds();
     }
 
     public void sendMessage(String eventName, String message, PublishStrategy publishStrategy) throws Exception {
@@ -52,11 +57,11 @@ public class EventMessagePublisher {
         sendMessage(eventName, message, publishStrategy, null, true);
     }
 
-    void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
+    public void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler) throws Exception {
         sendMessage(eventName, message, publishStrategy, messageHandler, false);
     }
 
-    void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler, boolean isRaw) throws Exception {
+    public void sendMessage(String eventName, String message, PublishStrategy publishStrategy, @Nullable MessageHandler messageHandler, boolean isRaw) throws Exception {
         switch (publishStrategy){
             case AZERON_NO_FALLBACK:
                 sendAzeronMessage(eventName, message, false, messageHandler, isRaw);
