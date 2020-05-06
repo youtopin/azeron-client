@@ -1,16 +1,16 @@
 package io.pinect.azeron.client.service.publisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.AbstractInvocationHandler;
 import lombok.SneakyThrows;
 import nats.client.MessageHandler;
-import org.springframework.cglib.proxy.InvocationHandler;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Method;
 
-public class PublisherProxy implements InvocationHandler {
+public class PublisherProxy extends AbstractInvocationHandler {
     private final EventMessagePublisher eventMessagePublisher;
     private final ObjectMapper objectMapper;
     private final TaskExecutor publisherThreadExecutor;
@@ -23,7 +23,10 @@ public class PublisherProxy implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object o, Method method, Object[] args) throws Throwable {
+    protected Object handleInvocation(Object o, Method method, Object[] args) throws Throwable {
+        if(o == null || !method.getName().equals("publish")){
+            return method.invoke(o, args);
+        }
         Object message = (null != args && args.length > 0) ? args[0] : null;
         Object messageHandler = (null != args && args.length > 1) ? args[1] : null;
 
@@ -42,7 +45,7 @@ public class PublisherProxy implements InvocationHandler {
                 }
             });
         }
-        return null;
+        return Void.TYPE;
     }
 
     @SneakyThrows
