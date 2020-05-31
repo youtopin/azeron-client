@@ -50,7 +50,6 @@ public class PublisherProxy extends AbstractInvocationHandler {
 
     @SneakyThrows
     private void doPublish(Object param, MessageHandler messageHandler, Publisher publisher){
-        System.out.println(Thread.currentThread().getId());
         String messageBody = objectMapper.writeValueAsString(publisher.forClass().cast(param));
         eventMessagePublisher.sendMessage(publisher.eventName(), messageBody, publisher.publishStrategy(), messageHandler, publisher.raw());
     }
