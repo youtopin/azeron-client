@@ -23,7 +23,7 @@ public class AzeronApplicationShutdownListener {
     @PreDestroy
     public void destroy(){
         try {
-            atomicNatsHolder.getNatsAtomicReference().get().close();;
+            atomicNatsHolder.getNatsAtomicReference().get().close();
         }catch (Exception ignored){}
 
         NatsConnectorProvider.getNioEventLoopGroupInstance().shutdownGracefully();

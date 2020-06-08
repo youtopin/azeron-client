@@ -14,7 +14,7 @@ public class NatsConnectorProvider {
 
     public static synchronized NioEventLoopGroup getNioEventLoopGroupInstance(){
         if(nioEventLoopGroup == null){
-            nioEventLoopGroup = new NioEventLoopGroup(100);
+            nioEventLoopGroup = new NioEventLoopGroup(20);
         }
         return nioEventLoopGroup;
     }
@@ -31,7 +31,7 @@ public class NatsConnectorProvider {
         }else {
             natsConnector.eventLoopGroup(getNioEventLoopGroupInstance());
         }
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(200);
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(40);
         scheduledThreadPoolExecutor.setRemoveOnCancelPolicy(true);
         scheduledThreadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
         scheduledThreadPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
