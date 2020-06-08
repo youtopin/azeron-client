@@ -1,5 +1,6 @@
 package io.pinect.azeron.client.config;
 
+import io.netty.util.concurrent.Future;
 import io.pinect.azeron.client.AtomicNatsHolder;
 import io.pinect.azeron.client.domain.HandlerPolicy;
 import io.pinect.azeron.client.domain.model.ClientConfig;
@@ -26,6 +27,11 @@ public class AzeronApplicationShutdownListener {
             atomicNatsHolder.getNatsAtomicReference().get().close();
         }catch (Exception ignored){}
 
-        NatsConnectorProvider.getNioEventLoopGroupInstance().shutdownGracefully();
+        Future<?> future = NatsConnectorProvider.getNioEventLoopGroupInstance().shutdownGracefully();
+        try {
+            future.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
