@@ -20,5 +20,6 @@ public class NatsConfigModel {
     private int idleTimeOut;
     private boolean pedantic;
     private int reconnectWaitSeconds;
+    @Builder.Default
     private int keepAliveSeconds = 20;
 }

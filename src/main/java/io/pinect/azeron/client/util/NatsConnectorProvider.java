@@ -10,6 +10,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class NatsConnectorProvider {
+    private static volatile NioEventLoopGroup nioEventLoopGroup;
+
+    public static synchronized NioEventLoopGroup getNioEventLoopGroupInstance(){
+        if(nioEventLoopGroup == null){
+            nioEventLoopGroup = new NioEventLoopGroup(20);
+        }
+        return nioEventLoopGroup;
+    }
+
     public static NatsConnector getNatsConnector(NatsConfigModel natsConfig){
         NatsConnector natsConnector = new NatsConnector();
         natsConfig.getHosts().forEach(natsConnector::addHost);
@@ -20,9 +29,9 @@ public class NatsConnectorProvider {
         if (natsConfig.isUseEpoll()) {
             natsConnector.eventLoopGroup(new EpollEventLoopGroup(500));
         }else {
-            natsConnector.eventLoopGroup(new NioEventLoopGroup(500));
+            natsConnector.eventLoopGroup(getNioEventLoopGroupInstance());
         }
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(200);
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(40);
         scheduledThreadPoolExecutor.setRemoveOnCancelPolicy(true);
         scheduledThreadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
         scheduledThreadPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);

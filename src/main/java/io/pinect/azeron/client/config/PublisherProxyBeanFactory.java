@@ -2,7 +2,8 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.service.publisher.PublisherProxy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.proxy.Proxy;
+
+import java.lang.reflect.Proxy;
 
 public class PublisherProxyBeanFactory {
     @Autowired

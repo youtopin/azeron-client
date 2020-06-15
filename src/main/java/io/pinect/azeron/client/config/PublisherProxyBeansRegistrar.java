@@ -2,6 +2,7 @@ package io.pinect.azeron.client.config;
 
 import io.pinect.azeron.client.EnableAzeronClient;
 import io.pinect.azeron.client.service.publisher.Publisher;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 @Configuration
+@Log4j2
 public class PublisherProxyBeansRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware {
     private ClassPathScanner classpathScanner;
     private ClassLoader classLoader;
@@ -69,8 +71,7 @@ public class PublisherProxyBeansRegistrar implements ImportBeanDefinitionRegistr
                 beanDefinitionRegistry.registerBeanDefinition(beanName, proxyBeanDefinition);
             }
         } catch (Exception e) {
-            System.out.println("Exception while creating proxy");
-            e.printStackTrace();
+            log.catching(e);
         }
     }
 
